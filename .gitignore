@@ -1,0 +1,21 @@
+# Maven
+target/
+*.jar
+*.war
+*.ear
+
+# Flutter
+.dart_tool/
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Local env
+.env

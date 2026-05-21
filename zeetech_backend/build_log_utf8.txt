@@ -1,0 +1,64 @@
+﻿[INFO] Scanning for projects...
+[INFO] 
+[INFO] --------------------< com.zeetech:zeetech_backend >---------------------
+[INFO] Building zeetech_backend 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] >>> spring-boot:3.2.5:run (default-cli) > test-compile @ zeetech_backend >>>
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ zeetech_backend ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] Copying 0 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ zeetech_backend ---
+[INFO] Changes detected - recompiling the module! :source
+[INFO] Compiling 10 source files with javac [debug release 17] to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ zeetech_backend ---
+[INFO] skip non existing resourceDirectory E:\ZeeTech\zeetech_backend\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.11.0:testCompile (default-testCompile) @ zeetech_backend ---
+[INFO] No sources to compile
+[INFO] 
+[INFO] <<< spring-boot:3.2.5:run (default-cli) < test-compile @ zeetech_backend <<<
+[INFO] 
+[INFO] 
+[INFO] --- spring-boot:3.2.5:run (default-cli) @ zeetech_backend ---
+[INFO] Attaching agents: []
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v3.2.5)
+
+2026-05-20T17:54:54.941+05:00  INFO 16728 --- [           main] com.zeetech.backend.BackendApplication   : Starting BackendApplication using Java 26.0.1 with PID 16728 (E:\ZeeTech\zeetech_backend\target\classes started by ABC in E:\ZeeTech\zeetech_backend)
+2026-05-20T17:54:54.945+05:00  INFO 16728 --- [           main] com.zeetech.backend.BackendApplication   : No active profile set, falling back to 1 default profile: "default"
+2026-05-20T17:54:56.857+05:00  INFO 16728 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-05-20T17:54:57.022+05:00  INFO 16728 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 150 ms. Found 2 JPA repository interfaces.
+WARNING: A restricted method in java.lang.System has been called
+WARNING: java.lang.System::load has been called by org.apache.tomcat.jni.Library in an unnamed module (file:/C:/Users/ABC/.m2/repository/org/apache/tomcat/embed/tomcat-embed-core/10.1.20/tomcat-embed-core-10.1.20.jar)
+WARNING: Use --enable-native-access=ALL-UNNAMED to avoid a warning for callers in this module
+WARNING: Restricted methods will be blocked in a future release unless native access is enabled
+
+2026-05-20T17:54:58.407+05:00  INFO 16728 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2026-05-20T17:54:58.442+05:00  INFO 16728 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-05-20T17:54:58.442+05:00  INFO 16728 --- [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.20]
+2026-05-20T17:54:58.624+05:00  INFO 16728 --- [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-05-20T17:54:58.625+05:00  INFO 16728 --- [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 3468 ms
+2026-05-20T17:54:59.308+05:00  INFO 16728 --- [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-05-20T17:54:59.433+05:00  INFO 16728 --- [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.4.4.Final
+2026-05-20T17:54:59.502+05:00  INFO 16728 --- [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-05-20T17:55:00.246+05:00  INFO 16728 --- [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-05-20T17:55:00.303+05:00  INFO 16728 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-05-20T17:55:01.547+05:00  INFO 16728 --- [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection ConnectionID:1 ClientConnectionId: ba23abfb-d07a-4331-bd8e-a361231f0fa1
+2026-05-20T17:55:01.551+05:00  INFO 16728 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-05-20T17:55:01.672+05:00  WARN 16728 --- [           main] org.hibernate.orm.deprecation            : HHH90000025: SQLServerDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-05-20T17:55:04.591+05:00  INFO 16728 --- [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-05-20T17:55:23.995+05:00  INFO 16728 --- [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-05-20T17:55:24.820+05:00  WARN 16728 --- [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-05-20T17:55:25.610+05:00  INFO 16728 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path ''
+2026-05-20T17:55:25.634+05:00  INFO 16728 --- [           main] com.zeetech.backend.BackendApplication   : Started BackendApplication in 31.752 seconds (process running for 32.994)
