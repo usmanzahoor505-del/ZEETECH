@@ -6,189 +6,156 @@ class ZeetechServicesScreen extends StatelessWidget {
 
   const ZeetechServicesScreen({super.key, required this.onNavigate});
 
-  static const List<Map<String, dynamic>> _services = [
+  static const List<Map<String, dynamic>> _categories = [
     {
       'id': 'ac',
-      'emoji': '❄️',
+      'icon': Icons.ac_unit_rounded,
       'name': 'Air Conditioner',
-      'description': 'Installation, repair & maintenance',
-      'gradient': AppGradients.ac,
     },
     {
       'id': 'refrigerator',
-      'emoji': '🧊',
+      'icon': Icons.kitchen_rounded,
       'name': 'Refrigerator',
-      'description': 'All brands service & repair',
-      'gradient': AppGradients.refrigerator,
     },
     {
       'id': 'solar',
-      'emoji': '☀️',
+      'icon': Icons.wb_sunny_rounded,
       'name': 'Solar Energy',
-      'description': 'Solar panel installation & repair',
-      'gradient': AppGradients.solar,
     },
     {
       'id': 'inverter',
-      'emoji': '🔋',
+      'icon': Icons.battery_charging_full_rounded,
       'name': 'Inverter Services',
-      'description': 'UPS & inverter solutions',
-      'gradient': AppGradients.inverter,
     },
     {
       'id': 'carpenter',
-      'emoji': '🪚',
+      'icon': Icons.handyman_rounded,
       'name': 'Carpenter',
-      'description': 'Furniture & woodwork services',
-      'gradient': AppGradients.carpenter,
     },
     {
       'id': 'electrician',
-      'emoji': '⚡',
-      'name': 'General Electrician',
-      'description': 'Wiring, fixtures & electrical work',
-      'gradient': AppGradients.electrician,
+      'icon': Icons.electrical_services_rounded,
+      'name': 'Electrician',
+    },
+    {
+      'id': 'cctv',
+      'icon': Icons.videocam_rounded,
+      'name': 'CCTV Installation',
+    },
+    {
+      'id': 'washing_machine',
+      'icon': Icons.local_laundry_service_rounded,
+      'name': 'Automatic washing machine',
     },
   ];
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        // Header
-        Container(
-          width: double.infinity,
-          decoration: const BoxDecoration(
-            gradient: AppGradients.header,
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-          child: const Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Our Services',
-                style: TextStyle(
-                  fontSize: 30,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: Column(
+          children: [
+            // 1. Top Custom App Bar matching Screenshot 2
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+              child: Row(
+                children: [
+                  // Back button
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.textDark, size: 20),
+                    onPressed: () => onNavigate('home'),
+                  ),
+                ],
               ),
-              SizedBox(height: 8),
-              Text(
-                'Professional repair & maintenance solutions',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.white70,
-                ),
-              ),
-            ],
-          ),
-        ),
+            ),
 
-        // Services Grid
-        Expanded(
-          child: ListView(
-            padding: const EdgeInsets.all(24),
-            children: [
-              GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
+            // Banner Title Section
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
+              child: const Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Home Services',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w900,
+                      color: AppColors.textDark,
+                      letterSpacing: -0.5,
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    'Select a category to view expert service packages',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: AppColors.textGray,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // 2. 3x3 Category Grid
+            Expanded(
+              child: GridView.builder(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
-                  childAspectRatio: 0.72, // Adjust card height
+                  crossAxisCount: 3,
+                  mainAxisSpacing: 14,
+                  crossAxisSpacing: 14,
+                  childAspectRatio: 0.90, // Makes them balanced squares
                 ),
-                itemCount: _services.length,
+                itemCount: _categories.length,
                 itemBuilder: (context, index) {
-                  final service = _services[index];
+                  final cat = _categories[index];
                   return GestureDetector(
-                    onTap: () => onNavigate('service-detail', serviceId: service['id']),
+                    onTap: () => onNavigate('service-detail', serviceId: cat['id']),
                     child: Container(
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(28),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: Colors.grey.shade200, width: 1),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.04),
-                            blurRadius: 10,
+                            color: Colors.black.withOpacity(0.015),
+                            blurRadius: 8,
                             offset: const Offset(0, 4),
                           ),
                         ],
-                        border: Border.all(color: Colors.grey.shade100),
                       ),
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          // Gradient Header with Emoji
+                          // Icon in a light circular container
                           Container(
-                            height: 110,
-                            width: double.infinity,
+                            padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              gradient: service['gradient'],
-                              borderRadius: const BorderRadius.vertical(
-                                top: Radius.circular(28),
-                              ),
+                              color: AppColors.primary.withOpacity(0.06),
+                              shape: BoxShape.circle,
                             ),
-                            alignment: Alignment.center,
-                            child: Text(
-                              service['emoji'],
-                              style: const TextStyle(fontSize: 48),
+                            child: Icon(
+                              cat['icon'],
+                              color: AppColors.primary,
+                              size: 26,
                             ),
                           ),
-
-                          // Content
-                          Expanded(
-                            child: Padding(
-                              padding: const EdgeInsets.all(12.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    service['name'],
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
-                                      color: AppColors.textDark,
-                                      height: 1.2,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Expanded(
-                                    child: Text(
-                                      service['description'],
-                                      style: TextStyle(
-                                        fontSize: 11,
-                                        color: Colors.grey.shade600,
-                                        height: 1.2,
-                                      ),
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  // Book Now button lookalike
-                                  Container(
-                                    width: double.infinity,
-                                    padding: const EdgeInsets.symmetric(vertical: 8),
-                                    decoration: BoxDecoration(
-                                      gradient: AppGradients.primary,
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    alignment: Alignment.center,
-                                    child: const Text(
-                                      'Book Now',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                          const SizedBox(height: 8),
+                          // Category Label
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                            child: Text(
+                              cat['name'],
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.textDark,
                               ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                         ],
@@ -197,94 +164,11 @@ class ZeetechServicesScreen extends StatelessWidget {
                   );
                 },
               ),
+            ),
 
-              const SizedBox(height: 24),
-
-              // Emergency Contact Card
-              Container(
-                decoration: BoxDecoration(
-                  gradient: AppGradients.header,
-                  borderRadius: BorderRadius.circular(28),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.darkBg.withOpacity(0.3),
-                      blurRadius: 15,
-                      offset: const Offset(0, 8),
-                    ),
-                  ],
-                ),
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: const BoxDecoration(
-                            color: AppColors.secondary,
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.bolt,
-                            color: Colors.white,
-                            size: 28,
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        const Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Emergency Service?',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              SizedBox(height: 2),
-                              Text(
-                                "We're available 24/7 for urgent repairs",
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.white70,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-                    InkWell(
-                      onTap: () => onNavigate('contact'),
-                      borderRadius: BorderRadius.circular(12),
-                      child: Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        decoration: BoxDecoration(
-                          gradient: AppGradients.primary,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        alignment: Alignment.center,
-                        child: const Text(
-                          'Call Now: 0300-5518622',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }

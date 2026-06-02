@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../theme/theme.dart';
 import '../models/booking_model.dart';
 import '../services/booking_repository.dart';
@@ -260,25 +259,9 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
         },
       );
 
+      if (!mounted) return;
+
       final String bookingId = DateTime.now().millisecondsSinceEpoch.toString();
-
-      // Create WhatsApp message
-      final String message = """
-🔧 *New Service Booking Request*
-
-*Service:* ${_serviceController.text}
-${widget.selectedSubServices.isNotEmpty ? "*Selected Offers:*\n$subServicesText\n*Total Price:* Rs. ${widget.totalPrice}" : ""}
-*Preferred Date:* ${_dateController.text}
-*Preferred Time:* ${_timeController.text}
-*Payment Method:* ${widget.paymentMethod}
-*Name:* ${_nameController.text}
-*Phone:* ${_phoneController.text}
-*Email:* ${_emailController.text.isEmpty ? "Not provided" : _emailController.text}
-*Address:* ${_addressController.text}
-*Additional Details:* ${_messageController.text.isEmpty ? "None" : _messageController.text}
-
-Thank you for choosing ZEETECH Technical Services!
-      """.trim();
 
       if (confirm == true) {
         // Show loading indicator

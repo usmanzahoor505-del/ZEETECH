@@ -58,8 +58,7 @@ class ZeetechContactScreen extends StatelessWidget {
             children: [
               // Contact Cards
               _buildContactButton(
-                icon: Icons.phone_outlined,
-                iconColor: Colors.white,
+                iconWidget: const Icon(Icons.phone_outlined, color: Colors.white, size: 28),
                 btnBgGradient: AppGradients.primary,
                 title: 'Phone',
                 subtitle: '+92 300 5518622',
@@ -69,8 +68,7 @@ class ZeetechContactScreen extends StatelessWidget {
               const SizedBox(height: 16),
 
               _buildContactButton(
-                icon: Icons.chat_bubble_outline,
-                iconColor: Colors.white,
+                iconWidget: const FaIcon(FontAwesomeIcons.whatsapp, color: Colors.white, size: 28),
                 btnBgColor: AppColors.whatsappGreen,
                 title: 'WhatsApp',
                 subtitle: '+92 300 5518622',
@@ -80,8 +78,7 @@ class ZeetechContactScreen extends StatelessWidget {
               const SizedBox(height: 16),
 
               _buildContactButton(
-                icon: Icons.mail_outline,
-                iconColor: Colors.white,
+                iconWidget: const Icon(Icons.mail_outline, color: Colors.white, size: 28),
                 btnBgGradient: const LinearGradient(
                   colors: [Colors.purple, Colors.pink],
                   begin: Alignment.topLeft,
@@ -94,10 +91,58 @@ class ZeetechContactScreen extends StatelessWidget {
               ),
               const SizedBox(height: 16),
 
+              _buildContactButton(
+                iconWidget: const FaIcon(FontAwesomeIcons.globe, color: Colors.white, size: 28),
+                btnBgGradient: const LinearGradient(
+                  colors: [Color(0xFF0D9488), Color(0xFF14B8A6)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                title: 'Website',
+                subtitle: 'www.zeetech26.com',
+                caption: 'Visit our official website',
+                onTap: () => _launchUrl('https://zeetech26.com/'),
+              ),
+              const SizedBox(height: 16),
+
+              _buildContactButton(
+                iconWidget: const FaIcon(FontAwesomeIcons.facebook, color: Colors.white, size: 28),
+                btnBgColor: const Color(0xFF1877F2),
+                title: 'Facebook',
+                subtitle: 'ZEETECH Engineering',
+                caption: 'Follow our official Facebook page',
+                onTap: () => _launchUrl('https://www.facebook.com/people/ZEETECH/61582035964807/?rdid=Nk9HDGfATsc7xAMM&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F1BS7AHHSx5%2F'),
+              ),
+              const SizedBox(height: 16),
+
+              _buildContactButton(
+                iconWidget: const FaIcon(FontAwesomeIcons.instagram, color: Colors.white, size: 28),
+                btnBgGradient: const LinearGradient(
+                  colors: [Color(0xFF8134AF), Color(0xFFDD2A7B), Color(0xFFF58529)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                title: 'Instagram',
+                subtitle: '@zeetech.26',
+                caption: 'See our design reels and updates',
+                onTap: () => _launchUrl('https://www.instagram.com/zeetech.26?igsh=YTQ3bDJoczl1cmZ0'),
+              ),
+              const SizedBox(height: 16),
+
+              _buildContactButton(
+                iconWidget: const FaIcon(FontAwesomeIcons.tiktok, color: Colors.white, size: 28),
+                btnBgColor: Colors.black,
+                title: 'TikTok',
+                subtitle: '@zeetech26',
+                caption: 'Watch our engineering work videos',
+                onTap: () => _launchUrl('https://www.tiktok.com/@zeetech26?_r=1&_t=ZS-95EIV49D8AT'),
+              ),
+              const SizedBox(height: 16),
+
               // Address card (tappable - opens Google Maps)
               InkWell(
                 onTap: () => _launchUrl(
-                  'https://www.google.com/maps/place/33%C2%B039\'35.3%22N+72%C2%B059\'21.1%22E/@33.6598056,72.9866195,17z',
+                  'https://www.google.com/maps/place/ZEETECH+Engineering/@33.657742,72.984981,19.74z/data=!4m14!1m7!3m6!1s0x38df97d71f2ca195:0x915d255641727aff!2sZEETECH+Engineering!8m2!3d33.657742!4d72.984981!16s%2Fg%2F11nbk_k4pp!3m5!1s0x38df97d71f2ca195:0x915d255641727aff!8m2!3d33.657742!4d72.984981!16s%2Fg%2F11nbk_k4pp',
                 ),
                 borderRadius: BorderRadius.circular(20),
                 child: Container(
@@ -148,7 +193,7 @@ class ZeetechContactScreen extends StatelessWidget {
                             ),
                             SizedBox(height: 4),
                             Text(
-                              'G-12 Ghazali Road, Islamabad',
+                              'ZEETECH Engineering, Ghazali Road, Islamabad',
                               style: TextStyle(
                                 fontSize: 13,
                                 color: AppColors.textGray,
@@ -187,7 +232,7 @@ class ZeetechContactScreen extends StatelessWidget {
               // Tappable Map Card
               InkWell(
                 onTap: () => _launchUrl(
-                  'https://www.google.com/maps/place/33%C2%B039\'35.3%22N+72%C2%B059\'21.1%22E/@33.6598056,72.9866195,17z',
+                  'https://www.google.com/maps/place/ZEETECH+Engineering/@33.657742,72.984981,19.74z/data=!4m14!1m7!3m6!1s0x38df97d71f2ca195:0x915d255641727aff!2sZEETECH+Engineering!8m2!3d33.657742!4d72.984981!16s%2Fg%2F11nbk_k4pp!3m5!1s0x38df97d71f2ca195:0x915d255641727aff!8m2!3d33.657742!4d72.984981!16s%2Fg%2F11nbk_k4pp',
                 ),
                 borderRadius: BorderRadius.circular(28),
                 child: Container(
@@ -237,7 +282,7 @@ class ZeetechContactScreen extends StatelessWidget {
                           ),
                           SizedBox(height: 4),
                           Text(
-                            'G-12 Ghazali Road, Islamabad',
+                            'ZEETECH Engineering, Ghazali Road, Islamabad',
                             style: TextStyle(
                               fontSize: 13,
                               color: AppColors.textGray,
@@ -331,58 +376,7 @@ class ZeetechContactScreen extends StatelessWidget {
                 ),
               ),
 
-              const SizedBox(height: 24),
-
-              // Operating Hours
-              Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  gradient: AppGradients.primary,
-                  borderRadius: BorderRadius.circular(24),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.primary.withOpacity(0.3),
-                      blurRadius: 15,
-                      offset: const Offset(0, 8),
-                    ),
-                  ],
-                ),
-                child: const Column(
-                  children: [
-                    Text(
-                      'Operating Hours',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                    SizedBox(height: 16),
-                    Text(
-                      'Monday - Saturday: 8:00 AM - 10:00 PM',
-                      style: TextStyle(color: Color(0xE6FFFFFF), fontSize: 14),
-                    ),
-                    SizedBox(height: 6),
-                    Text(
-                      'Sunday: 9:00 AM - 8:00 PM',
-                      style: TextStyle(color: Color(0xE6FFFFFF), fontSize: 14),
-                    ),
-                    SizedBox(height: 16),
-                    Divider(color: Colors.white24, height: 1),
-                    SizedBox(height: 16),
-                    Text(
-                      '🚨 Emergency Service: 24/7',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 24),
+              const SizedBox(height: 8),
             ],
           ),
         ),
@@ -391,8 +385,7 @@ class ZeetechContactScreen extends StatelessWidget {
   }
 
   Widget _buildContactButton({
-    required IconData icon,
-    required Color iconColor,
+    required Widget iconWidget,
     Gradient? btnBgGradient,
     Color? btnBgColor,
     required String title,
@@ -426,10 +419,12 @@ class ZeetechContactScreen extends StatelessWidget {
                 gradient: btnBgGradient,
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: Icon(
-                icon,
-                color: iconColor,
-                size: 28,
+              child: SizedBox(
+                width: 28,
+                height: 28,
+                child: Center(
+                  child: iconWidget,
+                ),
               ),
             ),
             const SizedBox(width: 16),
@@ -481,8 +476,8 @@ class ZeetechContactScreen extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(50),
       child: Container(
-        width: 56,
-        height: 56,
+        width: 44,
+        height: 44,
         decoration: BoxDecoration(
           color: isInstagram ? null : color,
           gradient: isInstagram
@@ -509,7 +504,7 @@ class ZeetechContactScreen extends StatelessWidget {
         child: FaIcon(
           icon,
           color: Colors.white,
-          size: 28,
+          size: 20,
         ),
       ),
     );

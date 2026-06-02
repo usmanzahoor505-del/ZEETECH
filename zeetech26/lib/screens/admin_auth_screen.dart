@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../theme/theme.dart';
 import '../services/admin_auth_service.dart';
 import 'admin_dashboard_screen.dart';
+import '../widgets/zeetech_logo.dart';
 
 class AdminAuthScreen extends StatefulWidget {
   const AdminAuthScreen({super.key});
@@ -103,7 +104,7 @@ class _AdminAuthScreenState extends State<AdminAuthScreen> {
     final primaryColor = AppColors.primary;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A), // Premium Dark Slate background
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -112,30 +113,22 @@ class _AdminAuthScreenState extends State<AdminAuthScreen> {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: SafeArea(
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: AppGradients.header,
+        ),
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 28.0),
+            padding: const EdgeInsets.symmetric(horizontal: 28.0, vertical: 32.0),
             child: Form(
               key: _formKey,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  // Logo or Icon
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: primaryColor.withOpacity(0.15),
-                      shape: BoxShape.circle,
-                      border: Border.all(color: primaryColor.withOpacity(0.3), width: 2),
-                    ),
-                    child: Icon(
-                      Icons.admin_panel_settings_rounded,
-                      size: 54,
-                      color: primaryColor,
-                    ),
-                  ),
+                  const SizedBox(height: 50),
+                  // Branded Square Logo Header matching screenshot
+                  const ZeetechLogo(size: 84),
                   const SizedBox(height: 20),
 
                   // Title
@@ -162,9 +155,9 @@ class _AdminAuthScreenState extends State<AdminAuthScreen> {
                   Container(
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.04),
+                      color: Colors.white.withOpacity(0.07),
                       borderRadius: BorderRadius.circular(24),
-                      border: Border.all(color: Colors.white.withOpacity(0.08)),
+                      border: Border.all(color: Colors.white.withOpacity(0.14)),
                       boxShadow: [
                         BoxShadow(
                           color: Colors.black.withOpacity(0.2),
@@ -275,7 +268,7 @@ class _AdminAuthScreenState extends State<AdminAuthScreen> {
                             hintStyle: TextStyle(color: Colors.grey.shade600, fontSize: 13),
                             prefixIcon: Icon(Icons.person_outline_rounded, color: Colors.grey.shade500),
                             filled: true,
-                            fillColor: Colors.white.withOpacity(0.03),
+                            fillColor: Colors.white.withOpacity(0.05),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(14),
                               borderSide: BorderSide(color: Colors.white.withOpacity(0.08)),
@@ -324,7 +317,7 @@ class _AdminAuthScreenState extends State<AdminAuthScreen> {
                               },
                             ),
                             filled: true,
-                            fillColor: Colors.white.withOpacity(0.03),
+                            fillColor: Colors.white.withOpacity(0.05),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(14),
                               borderSide: BorderSide(color: Colors.white.withOpacity(0.08)),
@@ -365,7 +358,7 @@ class _AdminAuthScreenState extends State<AdminAuthScreen> {
                               hintStyle: TextStyle(color: Colors.grey.shade600, fontSize: 13),
                               prefixIcon: Icon(Icons.security_rounded, color: Colors.grey.shade500),
                               filled: true,
-                              fillColor: Colors.white.withOpacity(0.03),
+                              fillColor: Colors.white.withOpacity(0.05),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(14),
                                 borderSide: BorderSide(color: Colors.white.withOpacity(0.08)),
@@ -395,18 +388,29 @@ class _AdminAuthScreenState extends State<AdminAuthScreen> {
                         ],
 
                         // Submit Button
-                        SizedBox(
+                        Container(
                           width: double.infinity,
                           height: 52,
+                          decoration: BoxDecoration(
+                            gradient: AppGradients.primary,
+                            borderRadius: BorderRadius.circular(14),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.primary.withOpacity(0.4),
+                                blurRadius: 12,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
                           child: ElevatedButton(
                             onPressed: _isLoading ? null : _handleSubmit,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: primaryColor,
+                              backgroundColor: Colors.transparent,
+                              shadowColor: Colors.transparent,
                               foregroundColor: Colors.white,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(14),
                               ),
-                              elevation: 2,
                             ),
                             child: _isLoading
                                 ? const SizedBox(

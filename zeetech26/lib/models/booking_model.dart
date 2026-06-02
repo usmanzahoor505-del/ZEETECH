@@ -11,6 +11,8 @@ class BookingModel {
   final String preferredDate;
   final String preferredTime;
   final String problemImagePath;
+  int? rating;
+  String? feedbackComment;
 
   BookingModel({
     required this.id,
@@ -25,6 +27,8 @@ class BookingModel {
     this.preferredDate = '',
     this.preferredTime = '',
     this.problemImagePath = '',
+    this.rating,
+    this.feedbackComment,
   });
 
   Map<String, dynamic> toJson() {
@@ -41,6 +45,8 @@ class BookingModel {
       'preferredDate': preferredDate,
       'preferredTime': preferredTime,
       'problemImagePath': problemImagePath,
+      'rating': rating,
+      'feedbackComment': feedbackComment,
     };
   }
 
@@ -58,6 +64,8 @@ class BookingModel {
       preferredDate: json['preferredDate'] ?? '',
       preferredTime: json['preferredTime'] ?? '',
       problemImagePath: json['problemImagePath'] ?? '',
+      rating: json['rating'],
+      feedbackComment: json['feedbackComment'],
     );
   }
 }

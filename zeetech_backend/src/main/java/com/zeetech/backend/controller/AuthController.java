@@ -101,8 +101,7 @@ public class AuthController {
         }
 
         User user = userOpt.get();
-        String passwordHash = HashUtil.hash(password);
-        if (!user.getPasswordHash().equals(passwordHash)) {
+        if (!HashUtil.verify(password, user.getPasswordHash())) {
             return ResponseEntity.status(401).body("Invalid credentials");
         }
 

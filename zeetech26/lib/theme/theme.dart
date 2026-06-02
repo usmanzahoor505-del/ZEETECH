@@ -2,17 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppColors {
-  static const Color primary = Color(0xFF0057FF);
-  static const Color secondary = Color(0xFF00C2FF);
-  static const Color darkBg = Color(0xFF0A1628);
-  static const Color darkBg2 = Color(0xFF0D1B2A);
-  static const Color lightBg = Color(0xFFF5F7FA);
-  static const Color grayBg = Color(0xFFE5E9F0);
-  static const Color textDark = Color(0xFF0A1628);
+  static const Color primary = Color(0xFF00529C);      // Royal Blue from your screenshot
+  static const Color secondary = Color(0xFF3884F4);    // Light Accent Blue from your screenshot
+  static const Color darkBg = Color(0xFF072D52);       // Deep Corporate Navy
+  static const Color darkBg2 = Color(0xFF00529C);      // Royal Blue Secondary
+  static const Color lightBg = Color(0xFFF0F4F8);      // Soft cool blue-gray background
+  static const Color grayBg = Color(0xFFE2EAF4);       // Gray border / background
+  static const Color textDark = Color(0xFF072D52);     // Deep Navy for text
   static const Color textLight = Colors.white;
-  static const Color textGray = Color(0xFF4A5568);
+  static const Color textGray = Color(0xFF3E4E68);     // Muted slate gray for secondary text
   static const Color whatsappGreen = Color(0xFF25D366);
-  static const Color border = Color(0xFFE2E8F0);
+  static const Color border = Color(0xFFD6E2F0);       // Soft premium border
 }
 
 class AppGradients {
@@ -23,43 +23,50 @@ class AppGradients {
   );
 
   static const LinearGradient header = LinearGradient(
-    colors: [AppColors.darkBg, AppColors.darkBg2],
+    colors: [AppColors.darkBg, AppColors.primary],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
+  // Customized category gradients to match the corporate royal/navy brand
   static const LinearGradient ac = LinearGradient(
-    colors: [Color(0xFF2563EB), Color(0xFF06B6D4)],
+    colors: [Color(0xFF00529C), Color(0xFF3884F4)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
   static const LinearGradient refrigerator = LinearGradient(
-    colors: [Color(0xFF0891B2), Color(0xFF3B82F6)],
+    colors: [Color(0xFF072D52), Color(0xFF00529C)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
   static const LinearGradient solar = LinearGradient(
-    colors: [Color(0xFFEAB308), Color(0xFFEA580C)],
+    colors: [Color(0xFF072D52), Color(0xFF3884F4)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
   static const LinearGradient inverter = LinearGradient(
-    colors: [Color(0xFF16A34A), Color(0xFF10B981)],
+    colors: [Color(0xFF00529C), Color(0xFFE2EAF4)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
   static const LinearGradient carpenter = LinearGradient(
-    colors: [Color(0xFFD97706), Color(0xFFCA8A04)],
+    colors: [Color(0xFF072D52), Color(0xFF3884F4)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
   static const LinearGradient electrician = LinearGradient(
-    colors: [Color(0xFF9333EA), Color(0xFF3B82F6)],
+    colors: [Color(0xFF00529C), Color(0xFF3884F4)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  static const LinearGradient washingMachine = LinearGradient(
+    colors: [Color(0xFF072D52), Color(0xFF00529C)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );

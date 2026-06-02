@@ -3,6 +3,7 @@ import '../theme/theme.dart';
 import '../services/user_auth_service.dart';
 import '../services/admin_auth_service.dart';
 import 'otp_verification_screen.dart';
+import '../widgets/zeetech_logo.dart';
 
 class ZeetechUnifiedAuthScreen extends StatefulWidget {
   final VoidCallback onLoginSuccess;
@@ -134,29 +135,20 @@ class _ZeetechUnifiedAuthScreenState extends State<ZeetechUnifiedAuthScreen> {
     final primaryColor = AppColors.primary;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A), // Premium Dark Slate Background
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Icon Header
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: primaryColor.withOpacity(0.15),
-                    shape: BoxShape.circle,
-                    border: Border.all(color: primaryColor.withOpacity(0.3), width: 2),
-                  ),
-                  child: Icon(
-                    Icons.security_rounded,
-                    size: 54,
-                    color: primaryColor,
-                  ),
-                ),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: AppGradients.header,
+        ),
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Branded Square Logo Header matching screenshot
+                  const ZeetechLogo(size: 84),
                 const SizedBox(height: 20),
 
                 // Title
@@ -180,9 +172,16 @@ class _ZeetechUnifiedAuthScreenState extends State<ZeetechUnifiedAuthScreen> {
                 Container(
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.04),
+                    color: Colors.white.withOpacity(0.07),
                     borderRadius: BorderRadius.circular(24),
-                    border: Border.all(color: Colors.white.withOpacity(0.08)),
+                    border: Border.all(color: Colors.white.withOpacity(0.14)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        blurRadius: 20,
+                        offset: const Offset(0, 10),
+                      ),
+                    ],
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -264,7 +263,7 @@ class _ZeetechUnifiedAuthScreenState extends State<ZeetechUnifiedAuthScreen> {
                             hintStyle: TextStyle(color: Colors.grey.shade600, fontSize: 13),
                             prefixIcon: Icon(Icons.person_outline_rounded, color: Colors.grey.shade500),
                             filled: true,
-                            fillColor: Colors.white.withOpacity(0.02),
+                            fillColor: Colors.white.withOpacity(0.05),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(14),
                               borderSide: BorderSide(color: Colors.white.withOpacity(0.08)),
@@ -299,7 +298,7 @@ class _ZeetechUnifiedAuthScreenState extends State<ZeetechUnifiedAuthScreen> {
                           hintStyle: TextStyle(color: Colors.grey.shade600, fontSize: 13),
                           prefixIcon: Icon(Icons.mail_outline_rounded, color: Colors.grey.shade500),
                           filled: true,
-                          fillColor: Colors.white.withOpacity(0.02),
+                          fillColor: Colors.white.withOpacity(0.05),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(14),
                             borderSide: BorderSide(color: Colors.white.withOpacity(0.08)),
@@ -334,7 +333,7 @@ class _ZeetechUnifiedAuthScreenState extends State<ZeetechUnifiedAuthScreen> {
                             hintStyle: TextStyle(color: Colors.grey.shade600, fontSize: 13),
                             prefixIcon: Icon(Icons.phone_android_outlined, color: Colors.grey.shade500),
                             filled: true,
-                            fillColor: Colors.white.withOpacity(0.02),
+                            fillColor: Colors.white.withOpacity(0.05),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(14),
                               borderSide: BorderSide(color: Colors.white.withOpacity(0.08)),
@@ -376,7 +375,7 @@ class _ZeetechUnifiedAuthScreenState extends State<ZeetechUnifiedAuthScreen> {
                             onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
                           ),
                           filled: true,
-                          fillColor: Colors.white.withOpacity(0.02),
+                          fillColor: Colors.white.withOpacity(0.05),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(14),
                             borderSide: BorderSide(color: Colors.white.withOpacity(0.08)),
@@ -399,16 +398,27 @@ class _ZeetechUnifiedAuthScreenState extends State<ZeetechUnifiedAuthScreen> {
                       const SizedBox(height: 28),
 
                       // Submit button
-                      SizedBox(
+                      Container(
                         width: double.infinity,
                         height: 52,
+                        decoration: BoxDecoration(
+                          gradient: AppGradients.primary,
+                          borderRadius: BorderRadius.circular(14),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.primary.withOpacity(0.4),
+                              blurRadius: 12,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
                         child: ElevatedButton(
                           onPressed: _isLoading ? null : _handleAuth,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: primaryColor,
+                            backgroundColor: Colors.transparent,
+                            shadowColor: Colors.transparent,
                             foregroundColor: Colors.white,
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                            elevation: 2,
                           ),
                           child: _isLoading
                               ? const SizedBox(
@@ -427,10 +437,10 @@ class _ZeetechUnifiedAuthScreenState extends State<ZeetechUnifiedAuthScreen> {
                       Center(
                         child: TextButton(
                           onPressed: widget.onExploreAsGuest,
-                          child: Text(
+                          child: const Text(
                             'Explore as Guest',
                             style: TextStyle(
-                              color: primaryColor,
+                              color: AppColors.secondary,
                               fontWeight: FontWeight.bold,
                               fontSize: 14,
                             ),
@@ -445,6 +455,7 @@ class _ZeetechUnifiedAuthScreenState extends State<ZeetechUnifiedAuthScreen> {
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }

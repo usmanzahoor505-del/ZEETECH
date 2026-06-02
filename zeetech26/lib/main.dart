@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'theme/theme.dart';
 import 'screens/splash_screen.dart';
 import 'screens/zeetech_home_screen.dart';
@@ -7,14 +8,20 @@ import 'screens/service_detail_screen.dart';
 import 'screens/zeetech_about_screen.dart';
 import 'screens/zeetech_contact_screen.dart';
 import 'screens/zeetech_account_screen.dart';
+import 'screens/zeetech_orders_screen.dart';
+import 'screens/zeetech_checkout_screen.dart';
 import 'screens/zeetech_unified_auth_screen.dart';
 import 'screens/admin_dashboard_screen.dart';
+import 'screens/zeetech_business_screen.dart';
+import 'screens/zeetech_products_screen.dart';
+import 'screens/product_detail_screen.dart';
 import 'services/user_auth_service.dart';
 import 'services/admin_auth_service.dart';
 import 'widgets/zeetech_bottom_nav.dart';
 import 'widgets/floating_whatsapp_button.dart';
 import 'widgets/booking_form_screen.dart';
 import 'widgets/feedback_bottom_sheet.dart';
+import 'widgets/feedbacks_list_bottom_sheet.dart';
 
 void main() {
   runApp(const MyApp());
@@ -45,7 +52,11 @@ class _AppEntryScreenState extends State<AppEntryScreen> {
   String _appState = 'splash'; // 'splash', 'check_session', 'auth', 'main', 'admin'
   String _activeTab = 'home'; // 'home', 'services', 'about', 'contact', 'account', 'service-detail'
   String? _selectedServiceId;
+  String? _selectedProductCategoryId;
   bool _isGuest = false;
+  
+  // Navigation history to handle physical/virtual device back buttons correctly
+  final List<String> _navigationHistory = [];
 
   @override
   void initState() {
@@ -81,14 +92,51 @@ class _AppEntryScreenState extends State<AppEntryScreen> {
 
   void _handleNavigate(String screen, {String? serviceId}) {
     setState(() {
+      if (_activeTab != screen) {
+        // If we are navigating back to the screen that was last in our history, pop it
+        if (_navigationHistory.isNotEmpty && _navigationHistory.last == screen) {
+          _navigationHistory.removeLast();
+        } else {
+          // Otherwise, it's a forward navigation. Record current tab to history
+          if (_navigationHistory.isEmpty || _navigationHistory.last != _activeTab) {
+            _navigationHistory.add(_activeTab);
+          }
+        }
+      }
+
       if (screen == 'service-detail' && serviceId != null) {
         _selectedServiceId = serviceId;
         _activeTab = 'service-detail';
+      } else if (screen == 'product-detail' && serviceId != null) {
+        _selectedProductCategoryId = serviceId;
+        _activeTab = 'product-detail';
       } else {
         _selectedServiceId = null;
+        _selectedProductCategoryId = null;
         _activeTab = screen;
       }
+
+      // If we go back to the home page, clear history to reset the back navigation stack
+      if (screen == 'home') {
+        _navigationHistory.clear();
+      }
     });
+  }
+
+  void _handleBackNavigation() {
+    if (_navigationHistory.isNotEmpty) {
+      final previousScreen = _navigationHistory.removeLast();
+      setState(() {
+        _activeTab = previousScreen;
+        // If we go back from service-detail, clear the selected service ID
+        if (_activeTab != 'service-detail') {
+          _selectedServiceId = null;
+        }
+        if (_activeTab != 'product-detail') {
+          _selectedProductCategoryId = null;
+        }
+      });
+    }
   }
 
   void _showSignInRequiredDialog() {
@@ -98,7 +146,7 @@ class _AppEntryScreenState extends State<AppEntryScreen> {
       isScrollControlled: true,
       builder: (context) => Container(
         decoration: const BoxDecoration(
-          color: Color(0xFF0F172A),
+          color: AppColors.darkBg,
           borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
         ),
         padding: const EdgeInsets.all(28),
@@ -218,12 +266,12 @@ class _AppEntryScreenState extends State<AppEntryScreen> {
     );
   }
 
-  void _openFeedbackSheet() {
+  void _openFeedbacksListSheet() {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => const FeedbackBottomSheet(),
+      builder: (context) => const FeedbacksListBottomSheet(),
     );
   }
 
@@ -243,6 +291,13 @@ class _AppEntryScreenState extends State<AppEntryScreen> {
       );
     }
 
+    if (_activeTab == 'product-detail' && _selectedProductCategoryId != null) {
+      return ProductDetailScreen(
+        categoryId: _selectedProductCategoryId!,
+        onNavigate: (screen) => _handleNavigate(screen),
+      );
+    }
+
     switch (_activeTab) {
       case 'home':
         return ZeetechHomeScreen(
@@ -252,10 +307,27 @@ class _AppEntryScreenState extends State<AppEntryScreen> {
         return ZeetechServicesScreen(
           onNavigate: (screen, {serviceId}) => _handleNavigate(screen, serviceId: serviceId),
         );
+      case 'orders':
+        return ZeetechOrdersScreen(
+          isGuest: _isGuest,
+          onNavigate: (screen) => _handleNavigate(screen),
+        );
+      case 'checkout':
+        return ZeetechCheckoutScreen(
+          onNavigate: (screen) => _handleNavigate(screen),
+        );
       case 'about':
         return const ZeetechAboutScreen();
       case 'contact':
         return const ZeetechContactScreen();
+      case 'business':
+        return ZeetechBusinessScreen(
+          onNavigate: (screen) => _handleNavigate(screen),
+        );
+      case 'products':
+        return ZeetechProductsScreen(
+          onNavigate: (screen, {serviceId}) => _handleNavigate(screen, serviceId: serviceId),
+        );
       case 'account':
         return ZeetechAccountScreen(
           isGuest: _isGuest,
@@ -288,7 +360,7 @@ class _AppEntryScreenState extends State<AppEntryScreen> {
 
     if (_appState == 'check_session') {
       return const Scaffold(
-        backgroundColor: Color(0xFF0F172A),
+        backgroundColor: AppColors.darkBg,
         body: Center(
           child: CircularProgressIndicator(color: AppColors.primary),
         ),
@@ -320,41 +392,56 @@ class _AppEntryScreenState extends State<AppEntryScreen> {
       );
     }
 
-    return Scaffold(
-      body: SafeArea(
-        top: _activeTab != 'service-detail', // Detail screen has its own top header
-        bottom: false,
-        child: Stack(
-          children: [
-            // Screen Content
-            Positioned.fill(
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: 64.0), // Padding to avoid overlap with bottom navigation bar
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) {
+        if (_activeTab == 'home') {
+          SystemNavigator.pop();
+        } else {
+          _handleBackNavigation();
+        }
+      },
+      child: Scaffold(
+        body: SafeArea(
+          top: _activeTab != 'service-detail' && _activeTab != 'product-detail', // Detail screens have their own top header
+          bottom: false,
+          child: Stack(
+            children: [
+              // Screen Content
+              Positioned.fill(
                 child: _renderContent(),
               ),
-            ),
-
-            // Floating WhatsApp Button
-            const Positioned(
-              bottom: 96,
-              right: 16,
-              child: FloatingWhatsAppButton(),
-            ),
-
-            // Floating Feedback Button
-            Positioned(
-              bottom: 170,
-              right: 16,
-              child: FloatingFeedbackButton(
-                onTap: _openFeedbackSheet,
+  
+              // Floating WhatsApp Button
+              const Positioned(
+                bottom: 96,
+                right: 16,
+                child: FloatingWhatsAppButton(),
               ),
-            ),
-          ],
+  
+              // Floating Feedback Button
+              Positioned(
+                bottom: 170,
+                right: 16,
+                child: FloatingFeedbackButton(
+                  onTap: _openFeedbacksListSheet,
+                ),
+              ),
+            ],
+          ),
         ),
-      ),
-      bottomNavigationBar: ZeetechBottomNav(
-        activeTab: _activeTab == 'service-detail' ? 'services' : _activeTab,
-        onTabChange: (tab) => _handleNavigate(tab),
+        bottomNavigationBar: ZeetechBottomNav(
+          activeTab: (_activeTab == 'orders')
+              ? 'orders'
+              : (_activeTab == 'contact')
+                  ? 'contact'
+                  : (_activeTab == 'account')
+                      ? 'account'
+                      : (_activeTab == 'about')
+                          ? 'about'
+                          : 'home',
+          onTabChange: (tab) => _handleNavigate(tab),
+        ),
       ),
     );
   }
@@ -389,7 +476,7 @@ class FloatingFeedbackButton extends StatelessWidget {
             Icon(Icons.star, color: Colors.white, size: 16),
             SizedBox(width: 4),
             Text(
-              'Feedback',
+              'Feedbacks',
               style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,

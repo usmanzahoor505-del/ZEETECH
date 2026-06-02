@@ -37,6 +37,13 @@
             <scope>runtime</scope>
         </dependency>
 
+        <!-- BCrypt Hashing Library for Password Security -->
+        <dependency>
+            <groupId>org.mindrot</groupId>
+            <artifactId>jbcrypt</artifactId>
+            <version>0.4</version>
+        </dependency>
+
         <!-- Spring Boot Starter Mail (OTP Verification) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

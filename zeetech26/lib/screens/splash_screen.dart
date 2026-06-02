@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../theme/theme.dart';
+import '../widgets/zeetech_logo.dart';
 
 class SplashScreen extends StatefulWidget {
   final VoidCallback onComplete;
@@ -82,7 +83,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // Floating Zap Icon
+                    // Floating Custom Zeetech Brand Logo matching screenshot
                     AnimatedBuilder(
                       animation: Listenable.merge([_zapTranslateController, _zapRotateController]),
                       builder: (context, child) {
@@ -90,22 +91,8 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                           offset: Offset(0, _translateAnimation.value),
                           child: Transform.rotate(
                             angle: _rotateAnimation.value,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: AppColors.secondary.withOpacity(0.4),
-                                    blurRadius: 30,
-                                    spreadRadius: 5,
-                                  ),
-                                ],
-                              ),
-                              child: const Icon(
-                                Icons.bolt,
-                                size: 90,
-                                color: AppColors.secondary,
-                              ),
+                            child: const ZeetechLogo(
+                              size: 110,
                             ),
                           ),
                         );

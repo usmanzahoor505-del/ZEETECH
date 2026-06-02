@@ -13,10 +13,10 @@ class ZeetechBottomNav extends StatelessWidget {
 
   static const List<Map<String, dynamic>> navItems = [
     {'id': 'home', 'icon': Icons.home_outlined, 'activeIcon': Icons.home, 'label': 'Home'},
-    {'id': 'services', 'icon': Icons.build_outlined, 'activeIcon': Icons.build, 'label': 'Services'},
-    {'id': 'about', 'icon': Icons.info_outline, 'activeIcon': Icons.info, 'label': 'About'},
+    {'id': 'orders', 'icon': Icons.receipt_long_outlined, 'activeIcon': Icons.receipt_long, 'label': 'Orders'},
+    {'id': 'about', 'icon': Icons.info_outline_rounded, 'activeIcon': Icons.info_rounded, 'label': 'About'},
     {'id': 'contact', 'icon': Icons.phone_outlined, 'activeIcon': Icons.phone, 'label': 'Contact'},
-    {'id': 'account', 'icon': Icons.account_circle_outlined, 'activeIcon': Icons.account_circle, 'label': 'Account'},
+    {'id': 'account', 'icon': Icons.account_circle_outlined, 'activeIcon': Icons.account_circle, 'label': 'Profile'},
   ];
 
   @override

@@ -1,5 +1,5 @@
 import { motion } from "motion/react";
-import { Wind, Refrigerator, Sun, Battery, Hammer, Zap } from "lucide-react";
+import { Wind, Refrigerator, Sun, Battery, Hammer, Zap, WashingMachine } from "lucide-react";
 
 interface ServicesScreenProps {
   onNavigate?: (screen: string, serviceId?: string) => void;
@@ -53,6 +53,14 @@ const services = [
     name: "General Electrician",
     description: "Wiring, fixtures & electrical work",
     gradient: "from-purple-600 to-blue-600",
+  },
+  {
+    id: "washing_machine",
+    icon: WashingMachine,
+    emoji: "🫧",
+    name: "Automatic washing machine",
+    description: "Auto washer repair & service",
+    gradient: "from-sky-600 to-blue-500",
   },
 ];
 

@@ -37,6 +37,8 @@ class BookingRepository {
             preferredDate: item['preferredDate'] ?? '',
             preferredTime: item['preferredTime'] ?? '',
             problemImagePath: item['problemImagePath'] ?? '',
+            rating: item['rating'],
+            feedbackComment: item['feedbackComment'],
           ));
         }
         // Sort newest first
@@ -87,6 +89,33 @@ class BookingRepository {
       return false;
     } catch (e) {
       debugPrint("Error updating booking status: $e");
+      return false;
+    }
+  }
+
+  Future<bool> submitFeedback(String id, int rating, String feedbackComment) async {
+    try {
+      final response = await http.put(
+        Uri.parse('${ApiConfig.backendUrl}/api/bookings/$id/feedback'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'rating': rating,
+          'feedbackComment': feedbackComment,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final index = _bookings.indexWhere((b) => b.id == id);
+        if (index != -1) {
+          _bookings[index].rating = rating;
+          _bookings[index].feedbackComment = feedbackComment;
+          bookingsNotifier.value = List.from(_bookings);
+        }
+        return true;
+      }
+      return false;
+    } catch (e) {
+      debugPrint("Error submitting feedback: $e");
       return false;
     }
   }

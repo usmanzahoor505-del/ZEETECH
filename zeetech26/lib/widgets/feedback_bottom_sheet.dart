@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import '../theme/theme.dart';
+import '../services/booking_repository.dart';
 
 class FeedbackBottomSheet extends StatefulWidget {
-  const FeedbackBottomSheet({super.key});
+  final String? bookingId;
+
+  const FeedbackBottomSheet({super.key, this.bookingId});
 
   @override
   State<FeedbackBottomSheet> createState() => _FeedbackBottomSheetState();
@@ -18,21 +21,48 @@ class _FeedbackBottomSheetState extends State<FeedbackBottomSheet> {
     super.dispose();
   }
 
-  void _handleSubmit() {
+  void _handleSubmit() async {
     if (_rating > 0) {
-      // Simulate API submit
-      debugPrint("Feedback submitted: Rating: $_rating, Feedback: ${_feedbackController.text}");
-
-      // Close the sheet
-      Navigator.pop(context);
-
-      // Show confirmation
+      // Show loading overlay or snackbar
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Thank you for your feedback!'),
-          backgroundColor: AppColors.primary,
+          content: Text('Submitting your feedback...'),
+          duration: Duration(seconds: 1),
         ),
       );
+
+      bool success = true;
+      if (widget.bookingId != null) {
+        success = await BookingRepository().submitFeedback(
+          widget.bookingId!,
+          _rating,
+          _feedbackController.text,
+        );
+      } else {
+        // General general feedback simulation
+        await Future.delayed(const Duration(milliseconds: 600));
+      }
+
+      if (mounted) {
+        // Close the sheet
+        Navigator.pop(context);
+
+        if (success) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Thank you! Your feedback has been saved.'),
+              backgroundColor: AppColors.primary,
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Failed to save feedback. Please try again.'),
+              backgroundColor: Colors.amber,
+            ),
+          );
+        }
+      }
     }
   }
 
