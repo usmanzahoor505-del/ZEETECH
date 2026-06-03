@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../theme/theme.dart';
 import '../models/booking_model.dart';
 import '../services/booking_repository.dart';
+import '../services/api_config.dart';
 import '../services/admin_auth_service.dart';
 import '../models/corporate_inquiry_model.dart';
 import '../services/corporate_inquiry_service.dart';
@@ -13,6 +14,7 @@ import '../models/service_price_model.dart';
 import '../services/service_price_service.dart';
 import '../models/product_price_model.dart';
 import '../services/product_price_service.dart';
+import '../services/user_auth_service.dart';
 import 'product_detail_screen.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
@@ -44,6 +46,10 @@ class _AppAdminDashboardScreenState extends State<AdminDashboardScreen> {
   List<ProductPriceModel> _dbProductPrices = [];
   bool _isLoadingDbProductPrices = false;
   String _selectedCategoryTabProductPrice = 'ac_products';
+
+  // Active technicians state
+  List<Map<String, dynamic>> _activeTechnicians = [];
+  bool _isLoadingTechnicians = false;
 
   Future<void> _launchUrl(String urlString) async {
     final url = Uri.parse(urlString);
@@ -94,6 +100,7 @@ class _AppAdminDashboardScreenState extends State<AdminDashboardScreen> {
     super.initState();
     _loadInquiries();
     _loadMemberships();
+    _loadTechnicians();
   }
 
   Future<void> _loadInquiries() async {
@@ -160,7 +167,9 @@ class _AppAdminDashboardScreenState extends State<AdminDashboardScreen> {
                               ? 'Service Price Manager'
                               : _currentView == 'product_prices'
                                   ? 'Product Price Manager'
-                                  : 'Corporate Inquiries',
+                                  : _currentView == 'technicians'
+                                      ? 'Manage Technicians'
+                                      : 'Corporate Inquiries',
           style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
         leading: _currentView != 'home'
@@ -243,6 +252,10 @@ class _AppAdminDashboardScreenState extends State<AdminDashboardScreen> {
 
           if (_currentView == 'product_prices') {
             return _buildProductPriceManagerView();
+          }
+
+          if (_currentView == 'technicians') {
+            return _buildTechniciansView();
           }
 
           // Otherwise, show 'bookings' manager view
@@ -551,10 +564,17 @@ class _AppAdminDashboardScreenState extends State<AdminDashboardScreen> {
                             alignment: Alignment.center,
                             children: [
                               InteractiveViewer(
-                                child: Image.file(
-                                  File(booking.problemImagePath),
-                                  fit: BoxFit.contain,
-                                ),
+                                child: booking.problemImagePath.startsWith('http') || booking.problemImagePath.startsWith('/uploads')
+                                    ? Image.network(
+                                        booking.problemImagePath.startsWith('http') ? booking.problemImagePath : '${ApiConfig.backendUrl}${booking.problemImagePath}',
+                                        fit: BoxFit.contain,
+                                        errorBuilder: (context, error, stackTrace) => const Center(child: Icon(Icons.broken_image, color: Colors.white, size: 50)),
+                                      )
+                                    : Image.file(
+                                        File(booking.problemImagePath),
+                                        fit: BoxFit.contain,
+                                        errorBuilder: (context, error, stackTrace) => const Center(child: Icon(Icons.broken_image, color: Colors.white, size: 50)),
+                                      ),
                               ),
                               Positioned(
                                 top: 16,
@@ -575,7 +595,9 @@ class _AppAdminDashboardScreenState extends State<AdminDashboardScreen> {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(12),
                         image: DecorationImage(
-                          image: FileImage(File(booking.problemImagePath)),
+                          image: booking.problemImagePath.startsWith('http') || booking.problemImagePath.startsWith('/uploads')
+                              ? NetworkImage(booking.problemImagePath.startsWith('http') ? booking.problemImagePath : '${ApiConfig.backendUrl}${booking.problemImagePath}')
+                              : FileImage(File(booking.problemImagePath)) as ImageProvider,
                           fit: BoxFit.cover,
                         ),
                         border: Border.all(color: Colors.grey.shade200),
@@ -586,6 +608,94 @@ class _AppAdminDashboardScreenState extends State<AdminDashboardScreen> {
               ],
             ),
           ),
+
+          if (booking.assignedWorker != null && booking.assignedWorker!.isNotEmpty) ...[
+            const Divider(height: 1),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.engineering_rounded, size: 18, color: AppColors.primary),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'Technician: ${booking.assignedWorker}',
+                          style: const TextStyle(fontSize: 13, color: AppColors.textDark, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      if (booking.status != 'Completed' && booking.status != 'Cancelled')
+                        _buildAssignDropdown(booking),
+                    ],
+                  ),
+                  if (booking.startedAt != null && booking.startedAt!.isNotEmpty) ...[
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
+                        const Icon(Icons.play_circle_outline_rounded, size: 14, color: Colors.blue),
+                        const SizedBox(width: 6),
+                        Text(
+                          'Started: ${_formatDateTime(booking.startedAt!)}',
+                          style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
+                        ),
+                      ],
+                    ),
+                  ],
+                  if (booking.completedAt != null && booking.completedAt!.isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        const Icon(Icons.check_circle_outline_rounded, size: 14, color: Colors.green),
+                        const SizedBox(width: 6),
+                        Text(
+                          'Completed: ${_formatDateTime(booking.completedAt!)}',
+                          style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
+                        ),
+                      ],
+                    ),
+                  ],
+                  if (booking.workSummary != null && booking.workSummary!.isNotEmpty) ...[
+                    const SizedBox(height: 6),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.green.withOpacity(0.04),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.green.withOpacity(0.1)),
+                      ),
+                      child: Text(
+                        'Work Summary: ${booking.workSummary}',
+                        style: const TextStyle(fontSize: 11, color: Colors.green, fontStyle: FontStyle.italic),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ] else ...[
+            if (booking.status != 'Completed' && booking.status != 'Cancelled') ...[
+              const Divider(height: 1),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                child: Row(
+                  children: [
+                    const Icon(Icons.engineering_rounded, size: 18, color: Colors.grey),
+                    const SizedBox(width: 8),
+                    const Expanded(
+                      child: Text(
+                        'No Technician Assigned',
+                        style: TextStyle(fontSize: 13, color: Colors.grey, fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                    _buildAssignDropdown(booking),
+                  ],
+                ),
+              ),
+            ],
+          ],
 
           const Divider(height: 1),
 
@@ -757,6 +867,20 @@ class _AppAdminDashboardScreenState extends State<AdminDashboardScreen> {
                       _currentView = 'product_prices';
                     });
                     _loadDbProductPrices();
+                  },
+                ),
+                const SizedBox(height: 20),
+                _buildDashboardMenuCard(
+                  icon: Icons.engineering_rounded,
+                  iconColor: Colors.blueAccent.shade700,
+                  title: 'Manage Technicians',
+                  subtitle: 'Register and assign field staff',
+                  description: 'Add new technicians, configure their expertise specialties, and view active personnel.',
+                  onTap: () {
+                    setState(() {
+                      _currentView = 'technicians';
+                    });
+                    _loadTechnicians();
                   },
                 ),
               ],
@@ -1588,44 +1712,123 @@ class _AppAdminDashboardScreenState extends State<AdminDashboardScreen> {
                                 ),
                               ],
 
-                              // Approved Section - Show Membership Card ID
+                              // Approved Section - Show Membership Card ID, Active Date, and Expiry Date
                               if (app.status == 'Approved' && app.membershipId != null) ...[
                                 const SizedBox(height: 16),
                                 Container(
                                   width: double.infinity,
-                                  padding: const EdgeInsets.all(14),
+                                  padding: const EdgeInsets.all(16),
                                   decoration: BoxDecoration(
                                     gradient: LinearGradient(
                                       colors: [Colors.teal.shade50, Colors.teal.shade50.withOpacity(0.3)],
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
                                     ),
-                                    borderRadius: BorderRadius.circular(16),
-                                    border: Border.all(color: Colors.teal.shade100),
+                                    borderRadius: BorderRadius.circular(20),
+                                    border: Border.all(color: Colors.teal.shade200.withOpacity(0.5)),
                                   ),
-                                  child: Row(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      const Icon(Icons.verified_user_rounded, color: Colors.teal, size: 24),
-                                      const SizedBox(width: 12),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            const Text(
-                                              'REGISTERED MEMBER ID',
-                                              style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.teal),
+                                      Row(
+                                        children: [
+                                          const Icon(Icons.verified_user_rounded, color: Colors.teal, size: 24),
+                                          const SizedBox(width: 12),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                const Text(
+                                                  'REGISTERED MEMBER ID',
+                                                  style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.teal),
+                                                ),
+                                                const SizedBox(height: 2),
+                                                Text(
+                                                  app.membershipId!,
+                                                  style: const TextStyle(
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Colors.teal,
+                                                    letterSpacing: 0.5,
+                                                  ),
+                                                ),
+                                              ],
                                             ),
-                                            const SizedBox(height: 2),
-                                            Text(
-                                              app.membershipId!,
-                                              style: const TextStyle(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.teal,
-                                                letterSpacing: 0.5,
+                                          ),
+                                        ],
+                                      ),
+                                      if (app.processedAt != null) ...[
+                                        Padding(
+                                          padding: const EdgeInsets.symmetric(vertical: 12.0),
+                                          child: Divider(height: 1, color: Colors.teal.shade100),
+                                        ),
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              child: Row(
+                                                children: [
+                                                  const Icon(Icons.calendar_today_rounded, color: Colors.teal, size: 14),
+                                                  const SizedBox(width: 8),
+                                                  Column(
+                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    children: [
+                                                      const Text(
+                                                        'ACTIVE DATE',
+                                                        style: TextStyle(fontSize: 8, fontWeight: FontWeight.w800, color: Colors.teal),
+                                                      ),
+                                                      const SizedBox(height: 2),
+                                                      Text(
+                                                        '${app.processedAt!.day}/${app.processedAt!.month}/${app.processedAt!.year}',
+                                                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w900, color: Colors.teal),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                            Expanded(
+                                              child: Builder(
+                                                builder: (context) {
+                                                  final start = app.processedAt!;
+                                                  int months = 3;
+                                                  if (app.validity == '6 Months') {
+                                                    months = 6;
+                                                  } else if (app.validity == '1 Year') {
+                                                    months = 12;
+                                                  }
+                                                  int newMonth = start.month + months;
+                                                  int newYear = start.year;
+                                                  while (newMonth > 12) {
+                                                    newMonth -= 12;
+                                                    newYear += 1;
+                                                  }
+                                                  final expiry = DateTime(newYear, newMonth, start.day);
+                                                  return Row(
+                                                    children: [
+                                                      const Icon(Icons.event_busy_rounded, color: Colors.redAccent, size: 14),
+                                                      const SizedBox(width: 8),
+                                                      Column(
+                                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                                        children: [
+                                                          const Text(
+                                                            'EXPIRY DATE',
+                                                            style: TextStyle(fontSize: 8, fontWeight: FontWeight.w800, color: Colors.redAccent),
+                                                          ),
+                                                          const SizedBox(height: 2),
+                                                          Text(
+                                                            '${expiry.day}/${expiry.month}/${expiry.year}',
+                                                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w900, color: Colors.redAccent),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ],
+                                                  );
+                                                }
                                               ),
                                             ),
                                           ],
                                         ),
-                                      ),
+                                      ],
                                     ],
                                   ),
                                 ),
@@ -3504,6 +3707,438 @@ class _AppAdminDashboardScreenState extends State<AdminDashboardScreen> {
               child: const Text('Add'),
             ),
           ],
+        );
+      },
+    );
+  }
+
+  // Technician Vetting and Management Flow
+  Future<void> _loadTechnicians() async {
+    setState(() {
+      _isLoadingTechnicians = true;
+    });
+    try {
+      final list = await UserAuthService.fetchActiveTechnicians();
+      setState(() {
+        _activeTechnicians = list;
+      });
+    } catch (e) {
+      debugPrint("Error loading technicians: $e");
+    } finally {
+      setState(() {
+        _isLoadingTechnicians = false;
+      });
+    }
+  }
+
+  String _formatDateTime(String isoString) {
+    try {
+      final dt = DateTime.parse(isoString);
+      final hour = dt.hour > 12 ? dt.hour - 12 : (dt.hour == 0 ? 12 : dt.hour);
+      final period = dt.hour >= 12 ? 'PM' : 'AM';
+      final min = dt.minute.toString().padLeft(2, '0');
+      return '${dt.day}/${dt.month}/${dt.year} $hour:$min $period';
+    } catch (_) {
+      return isoString.replaceAll('T', ' ').substring(0, 16);
+    }
+  }
+
+  Widget _buildAssignDropdown(BookingModel booking) {
+    return PopupMenuButton<String>(
+      tooltip: 'Assign Technician',
+      icon: const Icon(Icons.person_add_alt_1_rounded, color: AppColors.primary, size: 20),
+      onSelected: (workerName) async {
+        final success = await BookingRepository().assignWorker(booking.id, workerName);
+        if (success && mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Assigned to $workerName'),
+              backgroundColor: AppColors.primary,
+            ),
+          );
+        }
+      },
+      itemBuilder: (context) {
+        if (_activeTechnicians.isEmpty) {
+          return [
+            const PopupMenuItem<String>(
+              enabled: false,
+              value: '',
+              child: Text('No active technicians. Create one first!'),
+            ),
+          ];
+        }
+        return _activeTechnicians.map((tech) {
+          final String name = tech['fullName'] ?? 'Unknown';
+          final String spec = tech['specialty'] ?? '';
+          return PopupMenuItem<String>(
+            value: '$name (${tech['phone'] ?? "No Phone"})',
+            child: Row(
+              children: [
+                const Icon(Icons.engineering_outlined, color: AppColors.primary, size: 18),
+                const SizedBox(width: 8),
+                Text('$name (${spec.isNotEmpty ? spec : "General"})'),
+              ],
+            ),
+          );
+        }).toList();
+      },
+    );
+  }
+
+  Widget _buildTechniciansView() {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF9FAFB),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _showAddTechnicianDialog,
+        backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
+        icon: const Icon(Icons.add),
+        label: const Text('Add Technician'),
+      ),
+      body: _isLoadingTechnicians
+          ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+          : RefreshIndicator(
+              onRefresh: _loadTechnicians,
+              color: AppColors.primary,
+              child: _activeTechnicians.isEmpty
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(20),
+                            decoration: BoxDecoration(
+                              color: AppColors.primary.withOpacity(0.1),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(Icons.engineering_rounded, color: AppColors.primary, size: 60),
+                          ),
+                          const SizedBox(height: 20),
+                          const Text(
+                            'No Technicians Registered',
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textDark),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Add worker profiles to assign service jobs.',
+                            style: TextStyle(fontSize: 13, color: Colors.grey.shade500),
+                          ),
+                          const SizedBox(height: 20),
+                          ElevatedButton.icon(
+                            onPressed: _showAddTechnicianDialog,
+                            icon: const Icon(Icons.add, size: 18),
+                            label: const Text('Create Technician'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primary,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  : Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: GridView.builder(
+                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 1,
+                          mainAxisExtent: 136,
+                          mainAxisSpacing: 16,
+                        ),
+                        itemCount: _activeTechnicians.length,
+                        itemBuilder: (context, index) {
+                          final tech = _activeTechnicians[index];
+                          final id = tech['id'] as int?;
+                          final name = tech['fullName'] ?? '';
+                          final email = tech['email'] ?? '';
+                          final phone = tech['phone'] ?? '';
+                          final spec = tech['specialty'] ?? 'General';
+
+                          return Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(color: Colors.grey.shade100),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.02),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            padding: const EdgeInsets.all(16),
+                            child: Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.primary.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  child: const Icon(Icons.engineering_rounded, color: AppColors.primary, size: 32),
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              name,
+                                              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.textDark),
+                                            ),
+                                          ),
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                            decoration: BoxDecoration(
+                                              color: AppColors.primary.withOpacity(0.08),
+                                              borderRadius: BorderRadius.circular(8),
+                                            ),
+                                            child: Text(
+                                              spec,
+                                              style: const TextStyle(fontSize: 10, color: AppColors.primary, fontWeight: FontWeight.bold),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 6),
+                                      Row(
+                                        children: [
+                                          Icon(Icons.phone_outlined, size: 14, color: Colors.grey.shade500),
+                                          const SizedBox(width: 6),
+                                          Text(phone, style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Row(
+                                        children: [
+                                          Icon(Icons.mail_outline_rounded, size: 14, color: Colors.grey.shade500),
+                                          const SizedBox(width: 6),
+                                          Expanded(
+                                            child: Text(
+                                              email,
+                                              style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                if (id != null)
+                                  IconButton(
+                                    icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 22),
+                                    onPressed: () => _confirmDeleteTechnician(id, name),
+                                  ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+            ),
+    );
+  }
+
+  void _confirmDeleteTechnician(int id, String name) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text('Remove Technician?', style: TextStyle(fontWeight: FontWeight.bold)),
+        content: Text('Are you sure you want to remove technician $name? They will not be able to log in or handle bookings.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Cancel', style: TextStyle(color: Colors.grey.shade500)),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              final success = await UserAuthService.deleteTechnician(id);
+              if (success) {
+                _loadTechnicians();
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Technician removed successfully!'), backgroundColor: Colors.red),
+                  );
+                }
+              }
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showAddTechnicianDialog() {
+    final formKey = GlobalKey<FormState>();
+    final nameController = TextEditingController();
+    final emailController = TextEditingController();
+    final phoneController = TextEditingController();
+    final passwordController = TextEditingController();
+    String selectedSpec = 'AC Specialist';
+
+    final specialtiesList = [
+      'AC Specialist',
+      'Electrician',
+      'Solar Expert',
+      'Washing Machine Tech',
+      'Refrigerator Tech',
+      'Plumber',
+      'Carpenter',
+      'General Technician'
+    ];
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+              title: const Row(
+                children: [
+                  Icon(Icons.engineering_rounded, color: AppColors.primary),
+                  SizedBox(width: 10),
+                  Text('Add New Technician', style: TextStyle(fontWeight: FontWeight.w900)),
+                ],
+              ),
+              content: SingleChildScrollView(
+                child: Form(
+                  key: formKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('Full Name', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                      const SizedBox(height: 6),
+                      TextFormField(
+                        controller: nameController,
+                        decoration: InputDecoration(
+                          hintText: 'e.g. Usman Ali',
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        validator: (v) => v == null || v.trim().isEmpty ? 'Enter full name' : null,
+                      ),
+                      const SizedBox(height: 14),
+                      const Text('Email Address', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                      const SizedBox(height: 6),
+                      TextFormField(
+                        controller: emailController,
+                        keyboardType: TextInputType.emailAddress,
+                        decoration: InputDecoration(
+                          hintText: 'e.g. usman@gmail.com',
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        validator: (v) => v == null || v.trim().isEmpty ? 'Enter email' : null,
+                      ),
+                      const SizedBox(height: 14),
+                      const Text('Phone Number', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                      const SizedBox(height: 6),
+                      TextFormField(
+                        controller: phoneController,
+                        keyboardType: TextInputType.phone,
+                        decoration: InputDecoration(
+                          hintText: 'e.g. 03001234567',
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        validator: (v) => v == null || v.trim().isEmpty ? 'Enter phone number' : null,
+                      ),
+                      const SizedBox(height: 14),
+                      const Text('Password', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                      const SizedBox(height: 6),
+                      TextFormField(
+                        controller: passwordController,
+                        obscureText: true,
+                        decoration: InputDecoration(
+                          hintText: 'Min 6 characters',
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        validator: (v) => v == null || v.length < 6 ? 'Password must be at least 6 characters' : null,
+                      ),
+                      const SizedBox(height: 14),
+                      const Text('Specialty Category', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                      const SizedBox(height: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey.shade400),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            value: selectedSpec,
+                            isExpanded: true,
+                            onChanged: (val) {
+                              if (val != null) {
+                                setModalState(() {
+                                  selectedSpec = val;
+                                });
+                              }
+                            },
+                            items: specialtiesList.map((s) {
+                              return DropdownMenuItem<String>(
+                                value: s,
+                                child: Text(s),
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text('Cancel', style: TextStyle(color: Colors.grey.shade500)),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    if (formKey.currentState!.validate()) {
+                      Navigator.pop(context);
+                      final result = await UserAuthService.createTechnician(
+                        fullName: nameController.text.trim(),
+                        email: emailController.text.trim(),
+                        phone: phoneController.text.trim(),
+                        password: passwordController.text,
+                        specialty: selectedSpec,
+                      );
+
+                      if (result['success'] == true) {
+                        _loadTechnicians();
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Technician registered successfully!'), backgroundColor: Colors.green),
+                          );
+                        }
+                      } else {
+                        if (mounted) {
+                          final errMsg = result['message'] ?? 'Failed to create technician account.';
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(errMsg), backgroundColor: Colors.red),
+                          );
+                        }
+                      }
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white),
+                  child: const Text('Register'),
+                ),
+              ],
+            );
+          },
         );
       },
     );

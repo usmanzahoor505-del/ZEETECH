@@ -194,32 +194,49 @@ class _ZeetechBusinessScreenState extends State<ZeetechBusinessScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Custom App Bar for Form matching screenshot header style
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-          child: Row(
-            children: [
-              IconButton(
-                icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.textDark, size: 20),
-                onPressed: () {
-                  setState(() {
-                    _selectedCategory = null;
-                  });
-                },
-              ),
-              const SizedBox(width: 8),
-              Text(
-                categoryName,
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textDark,
-                ),
+        // Custom App Bar for Form matching premium dark corporate style
+        Container(
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF0F172A).withOpacity(0.18),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
               ),
             ],
           ),
+          padding: const EdgeInsets.fromLTRB(12.0, 14.0, 16.0, 14.0),
+          child: SafeArea(
+            bottom: false,
+            child: Row(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 20),
+                  onPressed: () {
+                    setState(() {
+                      _selectedCategory = null;
+                    });
+                  },
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  categoryName,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w900,
+                    color: Colors.white,
+                    letterSpacing: -0.5,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
-        const Divider(height: 1),
 
         // Scrollable Form
         Expanded(
@@ -591,58 +608,76 @@ class _ZeetechBusinessScreenState extends State<ZeetechBusinessScreen> {
   }
 
   Widget _buildHeaderRow() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-      child: Row(
-        children: [
-          IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.textDark, size: 20),
-            onPressed: () {
-              if (_showingUserInquiries) {
-                setState(() {
-                  _showingUserInquiries = false;
-                });
-              } else {
-                widget.onNavigate('home');
-              }
-            },
+    return Container(
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF0F172A).withOpacity(0.18),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              _showingUserInquiries ? 'My Business Inquiries' : 'ZEETECH For Business',
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textDark,
-              ),
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-          const SizedBox(width: 8),
-          if (!_showingUserInquiries && _selectedCategory == null)
-            TextButton.icon(
-              onPressed: _loadUserInquiries,
-              icon: const Icon(Icons.history_rounded, size: 16, color: AppColors.primary),
-              label: const Text(
-                'My Inquiries',
-                style: TextStyle(
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 11,
-                ),
-              ),
-              style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                minimumSize: Size.zero,
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  side: BorderSide(color: AppColors.primary.withOpacity(0.15)),
-                ),
-              ),
-            ),
         ],
+      ),
+      padding: const EdgeInsets.fromLTRB(12.0, 14.0, 16.0, 14.0),
+      child: SafeArea(
+        bottom: false,
+        child: Row(
+          children: [
+            IconButton(
+              icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 20),
+              onPressed: () {
+                if (_showingUserInquiries) {
+                  setState(() {
+                    _showingUserInquiries = false;
+                  });
+                } else {
+                  widget.onNavigate('home');
+                }
+              },
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                _showingUserInquiries ? 'My Inquiries' : 'ZEETECH For Business',
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w900,
+                  color: Colors.white,
+                  letterSpacing: -0.5,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            const SizedBox(width: 8),
+            if (!_showingUserInquiries && _selectedCategory == null)
+              TextButton.icon(
+                onPressed: _loadUserInquiries,
+                icon: const Icon(Icons.history_rounded, size: 16, color: Colors.white),
+                label: const Text(
+                  'My Inquiries',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 11,
+                  ),
+                ),
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    side: const BorderSide(color: Colors.white30),
+                  ),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -838,20 +873,17 @@ class _ZeetechBusinessScreenState extends State<ZeetechBusinessScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: _showingUserInquiries
-            ? Column(
-                children: [
-                  _buildHeaderRow(),
-                  const Divider(height: 1),
-                  Expanded(child: _buildUserInquiriesView()),
-                ],
-              )
-            : _selectedCategory == null 
-                ? _buildGridView() 
-                : _buildFormView(_selectedCategory!),
-      ),
+      backgroundColor: const Color(0xFFF9FAFB),
+      body: _showingUserInquiries
+          ? Column(
+              children: [
+                _buildHeaderRow(),
+                Expanded(child: _buildUserInquiriesView()),
+              ],
+            )
+          : _selectedCategory == null 
+              ? _buildGridView() 
+              : _buildFormView(_selectedCategory!),
     );
   }
 }

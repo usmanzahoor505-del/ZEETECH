@@ -13,6 +13,10 @@ class BookingModel {
   final String problemImagePath;
   int? rating;
   String? feedbackComment;
+  String? assignedWorker;
+  String? startedAt;
+  String? completedAt;
+  String? workSummary;
 
   BookingModel({
     required this.id,
@@ -29,6 +33,10 @@ class BookingModel {
     this.problemImagePath = '',
     this.rating,
     this.feedbackComment,
+    this.assignedWorker,
+    this.startedAt,
+    this.completedAt,
+    this.workSummary,
   });
 
   Map<String, dynamic> toJson() {
@@ -47,6 +55,10 @@ class BookingModel {
       'problemImagePath': problemImagePath,
       'rating': rating,
       'feedbackComment': feedbackComment,
+      'assignedWorker': assignedWorker,
+      'startedAt': startedAt,
+      'completedAt': completedAt,
+      'workSummary': workSummary,
     };
   }
 
@@ -66,6 +78,10 @@ class BookingModel {
       problemImagePath: json['problemImagePath'] ?? '',
       rating: json['rating'],
       feedbackComment: json['feedbackComment'],
+      assignedWorker: json['assignedWorker'],
+      startedAt: json['startedAt'],
+      completedAt: json['completedAt'],
+      workSummary: json['workSummary'],
     );
   }
 }

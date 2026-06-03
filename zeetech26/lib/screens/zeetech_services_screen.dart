@@ -52,122 +52,149 @@ class ZeetechServicesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Column(
-          children: [
-            // 1. Top Custom App Bar matching Screenshot 2
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+      backgroundColor: const Color(0xFFF9FAFB), // Matching premium slate-white background of home screen
+      body: Column(
+        children: [
+          // ── PREMIUM BRAND HEADER BAR ──
+          Container(
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFF0066FF), Color(0xFF00A3FF)], // Matching home services blue gradient
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF0066FF).withOpacity(0.2),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            padding: const EdgeInsets.fromLTRB(12.0, 14.0, 16.0, 14.0),
+            child: SafeArea(
+              bottom: false,
               child: Row(
                 children: [
-                  // Back button
                   IconButton(
-                    icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.textDark, size: 20),
+                    icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 20),
                     onPressed: () => onNavigate('home'),
                   ),
-                ],
-              ),
-            ),
-
-            // Banner Title Section
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
-              child: const Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
+                  const SizedBox(width: 8),
+                  const Text(
                     'Home Services',
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w900,
-                      color: AppColors.textDark,
+                      color: Colors.white,
                       letterSpacing: -0.5,
-                    ),
-                  ),
-                  SizedBox(height: 4),
-                  Text(
-                    'Select a category to view expert service packages',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: AppColors.textGray,
                     ),
                   ),
                 ],
               ),
             ),
+          ),
 
-            // 2. 3x3 Category Grid
-            Expanded(
-              child: GridView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
-                  mainAxisSpacing: 14,
-                  crossAxisSpacing: 14,
-                  childAspectRatio: 0.90, // Makes them balanced squares
+          // Banner Descriptive Subtitle Area
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Explore Expert Services',
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w900,
+                    color: AppColors.textDark,
+                    letterSpacing: -0.2,
+                  ),
                 ),
-                itemCount: _categories.length,
-                itemBuilder: (context, index) {
-                  final cat = _categories[index];
-                  return GestureDetector(
-                    onTap: () => onNavigate('service-detail', serviceId: cat['id']),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: Colors.grey.shade200, width: 1),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.015),
-                            blurRadius: 8,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          // Icon in a light circular container
-                          Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: AppColors.primary.withOpacity(0.06),
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              cat['icon'],
-                              color: AppColors.primary,
-                              size: 26,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          // Category Label
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                            child: Text(
-                              cat['name'],
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.textDark,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
+                const SizedBox(height: 4),
+                Text(
+                  'Select a service category to view specialized repair, installation, and custom plans.',
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    color: AppColors.textGray.withOpacity(0.9),
+                    fontWeight: FontWeight.w500,
+                    height: 1.3,
+                  ),
+                ),
+              ],
             ),
+          ),
 
-          ],
-        ),
+          // 2. 3x3 Category Grid - Upgraded premium cards
+          Expanded(
+            child: GridView.builder(
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                mainAxisSpacing: 14,
+                crossAxisSpacing: 14,
+                childAspectRatio: 0.88, // Balanced layout ratio
+              ),
+              itemCount: _categories.length,
+              itemBuilder: (context, index) {
+                final cat = _categories[index];
+                return GestureDetector(
+                  onTap: () => onNavigate('service-detail', serviceId: cat['id']),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(color: const Color(0xFFE5E7EB), width: 1.2),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.02),
+                          blurRadius: 10,
+                          offset: const Offset(0, 5),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // Icon inside clean premium brand circular container
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withOpacity(0.06),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            cat['icon'],
+                            color: AppColors.primary,
+                            size: 26,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        // Category Label
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 6.0),
+                          child: Text(
+                            cat['name'],
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.textDark,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+
+        ],
       ),
     );
   }

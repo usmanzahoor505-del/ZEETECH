@@ -393,15 +393,23 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
         title: Text(
           categoryName,
           style: const TextStyle(
-            color: AppColors.textDark,
+            color: Colors.white,
             fontWeight: FontWeight.w900,
             fontSize: 20,
           ),
         ),
-        backgroundColor: Colors.white,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFF0066FF), Color(0xFF00A3FF)], // Matching home services blue gradient
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.textDark, size: 20),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 20),
           onPressed: () => widget.onNavigate('services'),
         ),
       ),

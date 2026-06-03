@@ -48,6 +48,18 @@ public class Booking {
     @Column(name = "feedback_comment", length = 1000)
     private String feedbackComment;
 
+    @Column(name = "assigned_worker")
+    private String assignedWorker;
+
+    @Column(name = "started_at")
+    private LocalDateTime startedAt;
+
+    @Column(name = "completed_at")
+    private LocalDateTime completedAt;
+
+    @Column(name = "work_summary", length = 1000)
+    private String workSummary;
+
     // Constructors
     public Booking() {}
 
@@ -179,5 +191,37 @@ public class Booking {
 
     public void setFeedbackComment(String feedbackComment) {
         this.feedbackComment = feedbackComment;
+    }
+
+    public String getAssignedWorker() {
+        return assignedWorker;
+    }
+
+    public void setAssignedWorker(String assignedWorker) {
+        this.assignedWorker = assignedWorker;
+    }
+
+    public LocalDateTime getStartedAt() {
+        return startedAt;
+    }
+
+    public void setStartedAt(LocalDateTime startedAt) {
+        this.startedAt = startedAt;
+    }
+
+    public LocalDateTime getCompletedAt() {
+        return completedAt;
+    }
+
+    public void setCompletedAt(LocalDateTime completedAt) {
+        this.completedAt = completedAt;
+    }
+
+    public String getWorkSummary() {
+        return workSummary;
+    }
+
+    public void setWorkSummary(String workSummary) {
+        this.workSummary = workSummary;
     }
 }

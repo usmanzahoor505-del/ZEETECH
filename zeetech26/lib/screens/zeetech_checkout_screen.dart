@@ -6,6 +6,8 @@ import '../services/cart_service.dart';
 import '../services/booking_repository.dart';
 import '../services/user_auth_service.dart';
 import '../models/booking_model.dart';
+import '../services/upload_service.dart';
+import '../services/api_config.dart';
 
 class ZeetechCheckoutScreen extends StatefulWidget {
   final ValueChanged<String> onNavigate;
@@ -200,6 +202,17 @@ Preferred Schedule: ${_dateController.text} at ${_timeController.text}
       // Category Name matches the first item in cart (e.g. AC Services)
       final String categoryName = CartService().items.first.categoryName;
 
+      // Upload image first if picked
+      String finalImagePath = '';
+      if (_problemImagePath != null && _problemImagePath!.isNotEmpty) {
+        final String? uploadedUrl = await UploadService.uploadImage(_problemImagePath!);
+        if (uploadedUrl != null) {
+          finalImagePath = uploadedUrl;
+        } else {
+          finalImagePath = _problemImagePath!;
+        }
+      }
+
       final newBooking = BookingModel(
         id: bookingId,
         customerName: _nameController.text.trim(),
@@ -212,7 +225,7 @@ Preferred Schedule: ${_dateController.text} at ${_timeController.text}
         createdAt: DateTime.now(),
         preferredDate: _dateController.text,
         preferredTime: _timeController.text,
-        problemImagePath: _problemImagePath ?? '',
+        problemImagePath: finalImagePath,
       );
 
       final success = await BookingRepository().addBooking(newBooking);
@@ -299,7 +312,7 @@ Preferred Schedule: ${_dateController.text} at ${_timeController.text}
     final cart = CartService();
 
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: const Color(0xFFF9FAFB),
       appBar: AppBar(
         title: const Text(
           'Checkout',
@@ -307,6 +320,7 @@ Preferred Schedule: ${_dateController.text} at ${_timeController.text}
             color: AppColors.textDark,
             fontWeight: FontWeight.w900,
             fontSize: 20,
+            letterSpacing: -0.5,
           ),
         ),
         backgroundColor: Colors.white,
@@ -314,6 +328,12 @@ Preferred Schedule: ${_dateController.text} at ${_timeController.text}
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.textDark, size: 20),
           onPressed: () => widget.onNavigate('services'),
+        ),
+        shape: Border(
+          bottom: BorderSide(
+            color: Colors.grey.shade100,
+            width: 1.2,
+          ),
         ),
       ),
       body: ValueListenableBuilder<List<CartItem>>(

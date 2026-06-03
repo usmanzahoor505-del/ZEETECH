@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -110,6 +111,55 @@ public class AuthController {
         userResponse.put("fullName", user.getFullName());
         userResponse.put("phone", user.getPhone());
         userResponse.put("role", user.getRole());
+        userResponse.put("specialty", user.getSpecialty() != null ? user.getSpecialty() : "");
         return ResponseEntity.ok(userResponse);
+    }
+
+    @PostMapping("/technicians/create")
+    public ResponseEntity<?> createTechnician(@RequestBody Map<String, String> request) {
+        String fullName = request.get("fullName");
+        String email = request.get("email");
+        String phone = request.get("phone");
+        String password = request.get("password");
+        String specialty = request.get("specialty");
+
+        if (email == null || password == null || fullName == null) {
+            return ResponseEntity.badRequest().body("Full Name, Email, and Password are required");
+        }
+
+        Optional<User> existing = userRepository.findByEmail(email.trim());
+        if (existing.isPresent()) {
+            return ResponseEntity.badRequest().body("Email already registered");
+        }
+
+        String passwordHash = HashUtil.hash(password);
+        User user = new User(fullName, email, phone, passwordHash, "TECHNICIAN", specialty);
+        userRepository.save(user);
+
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Technician created successfully");
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/technicians/active")
+    public ResponseEntity<?> getActiveTechnicians() {
+        List<User> technicians = userRepository.findByRole("TECHNICIAN");
+        return ResponseEntity.ok(technicians);
+    }
+
+    @DeleteMapping("/technicians/{id}")
+    public ResponseEntity<?> deleteTechnician(@PathVariable Long id) {
+        Optional<User> userOpt = userRepository.findById(id);
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        User user = userOpt.get();
+        if (!"TECHNICIAN".equals(user.getRole())) {
+            return ResponseEntity.badRequest().body("User is not a technician");
+        }
+        userRepository.delete(user);
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Technician removed successfully");
+        return ResponseEntity.ok(response);
     }
 }

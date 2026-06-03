@@ -109,4 +109,62 @@ public class BookingController {
 
         return ResponseEntity.ok(booking);
     }
+
+    @PutMapping("/{id}/assign")
+    public ResponseEntity<?> assignWorker(@PathVariable String id, @RequestBody Map<String, String> request) {
+        String assignedWorker = request.get("assignedWorker");
+        if (assignedWorker == null || assignedWorker.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("Assigned Worker is required");
+        }
+
+        Optional<Booking> bookingOpt = bookingRepository.findById(id);
+        if (bookingOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Booking booking = bookingOpt.get();
+        booking.setAssignedWorker(assignedWorker);
+        booking.setStatus("Assigned");
+        bookingRepository.save(booking);
+
+        return ResponseEntity.ok(booking);
+    }
+
+    @PutMapping("/{id}/start")
+    public ResponseEntity<?> startWork(@PathVariable String id) {
+        Optional<Booking> bookingOpt = bookingRepository.findById(id);
+        if (bookingOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Booking booking = bookingOpt.get();
+        booking.setStartedAt(LocalDateTime.now());
+        booking.setStatus("In Progress");
+        bookingRepository.save(booking);
+
+        return ResponseEntity.ok(booking);
+    }
+
+    @PutMapping("/{id}/complete")
+    public ResponseEntity<?> completeWork(@PathVariable String id, @RequestBody Map<String, String> request) {
+        String workSummary = request.get("workSummary");
+
+        Optional<Booking> bookingOpt = bookingRepository.findById(id);
+        if (bookingOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Booking booking = bookingOpt.get();
+        booking.setCompletedAt(LocalDateTime.now());
+        booking.setWorkSummary(workSummary != null ? workSummary : "Completed successfully");
+        booking.setStatus("Completed");
+        bookingRepository.save(booking);
+
+        return ResponseEntity.ok(booking);
+    }
+
+    @GetMapping("/assigned/{workerName}")
+    public ResponseEntity<List<Booking>> getAssignedBookings(@PathVariable String workerName) {
+        return ResponseEntity.ok(bookingRepository.findByAssignedWorker(workerName));
+    }
 }

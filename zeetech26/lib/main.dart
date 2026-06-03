@@ -12,6 +12,7 @@ import 'screens/zeetech_orders_screen.dart';
 import 'screens/zeetech_checkout_screen.dart';
 import 'screens/zeetech_unified_auth_screen.dart';
 import 'screens/admin_dashboard_screen.dart';
+import 'screens/zeetech_technician_dashboard.dart';
 import 'screens/zeetech_business_screen.dart';
 import 'screens/zeetech_products_screen.dart';
 import 'screens/product_detail_screen.dart';
@@ -78,6 +79,13 @@ class _AppEntryScreenState extends State<AppEntryScreen> {
 
     final isUser = await UserAuthService.getCurrentUser();
     if (isUser != null) {
+      final details = await UserAuthService.getCurrentUserDetails();
+      if (details != null && details['role'] == 'TECHNICIAN') {
+        setState(() {
+          _appState = 'technician';
+        });
+        return;
+      }
       setState(() {
         _appState = 'main';
         _activeTab = 'home';
@@ -392,6 +400,16 @@ class _AppEntryScreenState extends State<AppEntryScreen> {
       );
     }
 
+    if (_appState == 'technician') {
+      return ZeetechTechnicianDashboard(
+        onLogout: () {
+          setState(() {
+            _appState = 'auth';
+          });
+        },
+      );
+    }
+
     return PopScope(
       canPop: false,
       onPopInvoked: (didPop) {
@@ -403,7 +421,10 @@ class _AppEntryScreenState extends State<AppEntryScreen> {
       },
       child: Scaffold(
         body: SafeArea(
-          top: _activeTab != 'service-detail' && _activeTab != 'product-detail', // Detail screens have their own top header
+          top: _activeTab != 'service-detail' && 
+               _activeTab != 'product-detail' && 
+               _activeTab != 'business' && 
+               _activeTab != 'products', // These screens manage their own bleeding headers
           bottom: false,
           child: Stack(
             children: [

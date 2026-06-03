@@ -90,50 +90,76 @@ class ZeetechProductsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Top App Bar
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+      backgroundColor: const Color(0xFFF9FAFB), // Match home screen canvas
+      body: Column(
+        children: [
+          // ── PREMIUM DARK CORPORATE APP BAR ──
+          Container(
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFF0F172A), Color(0xFF1E293B)], // Matching Store card slate gradient
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF0F172A).withOpacity(0.18),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            padding: const EdgeInsets.fromLTRB(12.0, 14.0, 16.0, 14.0),
+            child: SafeArea(
+              bottom: false,
               child: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.textDark, size: 20),
+                    icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 20),
                     onPressed: () => onNavigate('home'),
                   ),
-                ],
-              ),
-            ),
-
-            // Title Section
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
-              child: const Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
+                  const SizedBox(width: 8),
+                  const Text(
                     'ZEETECH Store',
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w900,
-                      color: AppColors.textDark,
+                      color: Colors.white,
                       letterSpacing: -0.5,
-                    ),
-                  ),
-                  SizedBox(height: 4),
-                  Text(
-                    'Browse products & spare parts for all categories',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: AppColors.textGray,
                     ),
                   ),
                 ],
               ),
             ),
+          ),
+
+          // Title Section
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
+            child: const Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Browse Products & Spares',
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w900,
+                    color: AppColors.textDark,
+                    letterSpacing: -0.2,
+                  ),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  'Explore complete units, corporate systems, and replacement accessories.',
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    color: AppColors.textGray,
+                  ),
+                ),
+              ],
+            ),
+          ),
 
             // Scrollable Content
             Expanded(
@@ -164,8 +190,7 @@ class ZeetechProductsScreen extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
+      );
   }
 
   Widget _buildSectionHeader({

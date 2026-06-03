@@ -6,4 +6,5 @@ import java.util.List;
 
 public interface BookingRepository extends JpaRepository<Booking, String> {
     List<Booking> findByCustomerName(String customerName);
+    List<Booking> findByAssignedWorker(String assignedWorker);
 }

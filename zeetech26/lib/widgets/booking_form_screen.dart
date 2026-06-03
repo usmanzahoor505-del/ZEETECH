@@ -5,6 +5,7 @@ import '../theme/theme.dart';
 import '../models/booking_model.dart';
 import '../services/booking_repository.dart';
 import '../services/user_auth_service.dart';
+import '../services/upload_service.dart';
 
 class BookingFormScreen extends StatefulWidget {
   final String serviceName;
@@ -273,6 +274,17 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
           ),
         );
 
+        // Upload image first if picked
+        String finalImagePath = '';
+        if (_problemImagePath != null && _problemImagePath!.isNotEmpty) {
+          final String? uploadedUrl = await UploadService.uploadImage(_problemImagePath!);
+          if (uploadedUrl != null) {
+            finalImagePath = uploadedUrl;
+          } else {
+            finalImagePath = _problemImagePath!;
+          }
+        }
+
         // Save booking details to repository as Pending
         final newBooking = BookingModel(
           id: bookingId,
@@ -287,7 +299,7 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
           createdAt: DateTime.now(),
           preferredDate: _dateController.text,
           preferredTime: _timeController.text,
-          problemImagePath: _problemImagePath ?? '',
+          problemImagePath: finalImagePath,
         );
 
         final bool success = await BookingRepository().addBooking(newBooking);
@@ -326,6 +338,17 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
           ),
         );
 
+        // Upload image first if picked
+        String finalImagePath = '';
+        if (_problemImagePath != null && _problemImagePath!.isNotEmpty) {
+          final String? uploadedUrl = await UploadService.uploadImage(_problemImagePath!);
+          if (uploadedUrl != null) {
+            finalImagePath = uploadedUrl;
+          } else {
+            finalImagePath = _problemImagePath!;
+          }
+        }
+
         // Save booking details to repository as Cancelled
         final newBooking = BookingModel(
           id: bookingId,
@@ -340,7 +363,7 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
           createdAt: DateTime.now(),
           preferredDate: _dateController.text,
           preferredTime: _timeController.text,
-          problemImagePath: _problemImagePath ?? '',
+          problemImagePath: finalImagePath,
         );
 
         final bool success = await BookingRepository().addBooking(newBooking);

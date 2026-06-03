@@ -21,7 +21,9 @@ public class User {
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 
-    private String role; // "USER" or "ADMIN"
+    private String role; // "USER" or "ADMIN" or "TECHNICIAN"
+
+    private String specialty; // Category/Expertise for technicians, e.g. "AC Repair"
 
     // Constructors
     public User() {}
@@ -32,6 +34,15 @@ public class User {
         this.phone = phone;
         this.passwordHash = passwordHash;
         this.role = role;
+    }
+
+    public User(String fullName, String email, String phone, String passwordHash, String role, String specialty) {
+        this.fullName = fullName;
+        this.email = email;
+        this.phone = phone;
+        this.passwordHash = passwordHash;
+        this.role = role;
+        this.specialty = specialty;
     }
 
     // Getters and Setters
@@ -81,5 +92,13 @@ public class User {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public String getSpecialty() {
+        return specialty;
+    }
+
+    public void setSpecialty(String specialty) {
+        this.specialty = specialty;
     }
 }

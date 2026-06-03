@@ -39,6 +39,10 @@ class BookingRepository {
             problemImagePath: item['problemImagePath'] ?? '',
             rating: item['rating'],
             feedbackComment: item['feedbackComment'],
+            assignedWorker: item['assignedWorker'],
+            startedAt: item['startedAt'],
+            completedAt: item['completedAt'],
+            workSummary: item['workSummary'],
           ));
         }
         // Sort newest first
@@ -117,6 +121,121 @@ class BookingRepository {
     } catch (e) {
       debugPrint("Error submitting feedback: $e");
       return false;
+    }
+  }
+
+  // Assign a technician to a booking
+  Future<bool> assignWorker(String id, String workerName) async {
+    try {
+      final response = await http.put(
+        Uri.parse('${ApiConfig.backendUrl}/api/bookings/$id/assign'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'assignedWorker': workerName}),
+      );
+
+      if (response.statusCode == 200) {
+        final index = _bookings.indexWhere((b) => b.id == id);
+        if (index != -1) {
+          _bookings[index].assignedWorker = workerName;
+          _bookings[index].status = 'Assigned';
+          bookingsNotifier.value = List.from(_bookings);
+        }
+        return true;
+      }
+      return false;
+    } catch (e) {
+      debugPrint("Error assigning worker: $e");
+      return false;
+    }
+  }
+
+  // Start work on a booking (Technician action)
+  Future<bool> startWork(String id) async {
+    try {
+      final response = await http.put(
+        Uri.parse('${ApiConfig.backendUrl}/api/bookings/$id/start'),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> updatedData = jsonDecode(response.body);
+        final index = _bookings.indexWhere((b) => b.id == id);
+        if (index != -1) {
+          _bookings[index].status = 'In Progress';
+          _bookings[index].startedAt = updatedData['startedAt'];
+          bookingsNotifier.value = List.from(_bookings);
+        }
+        return true;
+      }
+      return false;
+    } catch (e) {
+      debugPrint("Error starting work: $e");
+      return false;
+    }
+  }
+
+  // Complete work on a booking (Technician action)
+  Future<bool> completeWork(String id, String workSummary) async {
+    try {
+      final response = await http.put(
+        Uri.parse('${ApiConfig.backendUrl}/api/bookings/$id/complete'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'workSummary': workSummary}),
+      );
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> updatedData = jsonDecode(response.body);
+        final index = _bookings.indexWhere((b) => b.id == id);
+        if (index != -1) {
+          _bookings[index].status = 'Completed';
+          _bookings[index].completedAt = updatedData['completedAt'];
+          _bookings[index].workSummary = workSummary;
+          bookingsNotifier.value = List.from(_bookings);
+        }
+        return true;
+      }
+      return false;
+    } catch (e) {
+      debugPrint("Error completing work: $e");
+      return false;
+    }
+  }
+
+  // Fetch all bookings assigned to a specific worker
+  Future<List<BookingModel>> fetchAssignedBookings(String workerName) async {
+    try {
+      final response = await http.get(Uri.parse('${ApiConfig.backendUrl}/api/bookings/assigned/$workerName'));
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+        final List<BookingModel> list = [];
+        for (var item in data) {
+          list.add(BookingModel(
+            id: item['id'],
+            customerName: item['customerName'],
+            customerPhone: item['customerPhone'] ?? '',
+            customerEmail: item['customerEmail'] ?? '',
+            customerAddress: item['customerAddress'] ?? '',
+            serviceName: item['serviceName'],
+            message: item['message'] ?? '',
+            status: item['status'],
+            createdAt: DateTime.parse(item['createdAt']),
+            preferredDate: item['preferredDate'] ?? '',
+            preferredTime: item['preferredTime'] ?? '',
+            problemImagePath: item['problemImagePath'] ?? '',
+            rating: item['rating'],
+            feedbackComment: item['feedbackComment'],
+            assignedWorker: item['assignedWorker'],
+            startedAt: item['startedAt'],
+            completedAt: item['completedAt'],
+            workSummary: item['workSummary'],
+          ));
+        }
+        return list;
+      }
+      return [];
+    } catch (e) {
+      debugPrint("Error fetching assigned bookings: $e");
+      return [];
     }
   }
 }
