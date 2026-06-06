@@ -42,6 +42,291 @@ class _ZeetechUnifiedAuthScreenState extends State<ZeetechUnifiedAuthScreen> {
     super.dispose();
   }
 
+  void _showForgotPasswordDialog() {
+    final emailController = TextEditingController(text: _emailController.text);
+    final otpController = TextEditingController();
+    final newPasswordController = TextEditingController();
+    final confirmPasswordController = TextEditingController();
+    
+    final dialogFormKey = GlobalKey<FormState>();
+    bool isStepOne = true;
+    bool isDialogLoading = false;
+    String? dialogError;
+    bool obscureNewPassword = true;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              backgroundColor: const Color(0xFF1E293B),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+              title: const Row(
+                children: [
+                  Icon(Icons.lock_reset_rounded, color: AppColors.secondary),
+                  SizedBox(width: 8),
+                  Text(
+                    'Reset Password',
+                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+              content: SingleChildScrollView(
+                child: Form(
+                  key: dialogFormKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (dialogError != null) ...[
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: Colors.redAccent.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.redAccent.withOpacity(0.3)),
+                          ),
+                          child: Text(
+                            dialogError!,
+                            style: const TextStyle(color: Colors.redAccent, fontSize: 12),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                      ],
+
+                      if (isStepOne) ...[
+                        const Text(
+                          'Enter your registered email address to receive a verification code:',
+                          style: TextStyle(color: Colors.blueGrey, fontSize: 13, height: 1.4),
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: emailController,
+                          style: const TextStyle(color: Colors.white, fontSize: 14),
+                          keyboardType: TextInputType.emailAddress,
+                          decoration: InputDecoration(
+                            hintText: 'Enter your email',
+                            hintStyle: TextStyle(color: Colors.grey, fontSize: 13),
+                            prefixIcon: const Icon(Icons.email_outlined, color: Colors.grey),
+                            filled: true,
+                            fillColor: Colors.white.withOpacity(0.05),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(14),
+                              borderSide: BorderSide(color: Colors.white.withOpacity(0.08)),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(14),
+                              borderSide: const BorderSide(color: AppColors.secondary),
+                            ),
+                          ),
+                          validator: (val) {
+                            if (val == null || val.trim().isEmpty) {
+                              return 'Please enter your email';
+                            }
+                            return null;
+                          },
+                        ),
+                      ] else ...[
+                        Text(
+                          'We sent a 6-digit verification code to:\n${emailController.text}',
+                          style: const TextStyle(color: Colors.blueGrey, fontSize: 13, height: 1.4),
+                        ),
+                        const SizedBox(height: 16),
+                        const Text(
+                          'Verification Code (OTP)',
+                          style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 6),
+                        TextFormField(
+                          controller: otpController,
+                          style: const TextStyle(color: Colors.white, fontSize: 14),
+                          keyboardType: TextInputType.number,
+                          maxLength: 6,
+                          decoration: InputDecoration(
+                            counterText: "",
+                            hintText: 'Enter 6-digit code',
+                            hintStyle: TextStyle(color: Colors.grey, fontSize: 13),
+                            prefixIcon: const Icon(Icons.pin_outlined, color: Colors.grey),
+                            filled: true,
+                            fillColor: Colors.white.withOpacity(0.05),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(14),
+                              borderSide: BorderSide(color: Colors.white.withOpacity(0.08)),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(14),
+                              borderSide: const BorderSide(color: AppColors.secondary),
+                            ),
+                          ),
+                          validator: (val) {
+                            if (val == null || val.trim().length < 6) {
+                              return 'Please enter 6-digit code';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 14),
+                        const Text(
+                          'New Password',
+                          style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 6),
+                        TextFormField(
+                          controller: newPasswordController,
+                          obscureText: obscureNewPassword,
+                          style: const TextStyle(color: Colors.white, fontSize: 14),
+                          decoration: InputDecoration(
+                            hintText: 'Enter new password',
+                            hintStyle: TextStyle(color: Colors.grey, fontSize: 13),
+                            prefixIcon: const Icon(Icons.lock_outline, color: Colors.grey),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                obscureNewPassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                                color: Colors.grey,
+                                size: 18,
+                              ),
+                              onPressed: () => setDialogState(() => obscureNewPassword = !obscureNewPassword),
+                            ),
+                            filled: true,
+                            fillColor: Colors.white.withOpacity(0.05),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(14),
+                              borderSide: BorderSide(color: Colors.white.withOpacity(0.08)),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(14),
+                              borderSide: const BorderSide(color: AppColors.secondary),
+                            ),
+                          ),
+                          validator: (val) {
+                            if (val == null || val.length < 6) {
+                              return 'Password must be at least 6 characters';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 14),
+                        const Text(
+                          'Confirm New Password',
+                          style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 6),
+                        TextFormField(
+                          controller: confirmPasswordController,
+                          obscureText: obscureNewPassword,
+                          style: const TextStyle(color: Colors.white, fontSize: 14),
+                          decoration: InputDecoration(
+                            hintText: 'Confirm new password',
+                            hintStyle: TextStyle(color: Colors.grey, fontSize: 13),
+                            prefixIcon: const Icon(Icons.lock_outline, color: Colors.grey),
+                            filled: true,
+                            fillColor: Colors.white.withOpacity(0.05),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(14),
+                              borderSide: BorderSide(color: Colors.white.withOpacity(0.08)),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(14),
+                              borderSide: const BorderSide(color: AppColors.secondary),
+                            ),
+                          ),
+                          validator: (val) {
+                            if (val == null || val != newPasswordController.text) {
+                              return 'Passwords do not match';
+                            }
+                            return null;
+                          },
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: isDialogLoading
+                      ? null
+                      : () => Navigator.pop(context),
+                  child: Text('Cancel', style: TextStyle(color: Colors.grey.shade500)),
+                ),
+                ElevatedButton(
+                  onPressed: isDialogLoading
+                      ? null
+                      : () async {
+                          if (!dialogFormKey.currentState!.validate()) return;
+                          
+                          setDialogState(() {
+                            isDialogLoading = true;
+                            dialogError = null;
+                          });
+
+                          try {
+                            if (isStepOne) {
+                              final result = await UserAuthService.requestPasswordReset(emailController.text.trim());
+                              if (result['success'] == true) {
+                                setDialogState(() {
+                                  isStepOne = false;
+                                });
+                              } else {
+                                setDialogState(() {
+                                  dialogError = result['message'] ?? 'Failed to send verification code.';
+                                });
+                              }
+                            } else {
+                              final result = await UserAuthService.resetPassword(
+                                email: emailController.text.trim(),
+                                otp: otpController.text.trim(),
+                                newPassword: newPasswordController.text,
+                              );
+                              if (result['success'] == true) {
+                                Navigator.pop(context);
+                                _emailController.text = emailController.text.trim();
+                                _passwordController.clear();
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Password updated successfully! Please login with your new password.'),
+                                    backgroundColor: Colors.green,
+                                  ),
+                                );
+                              } else {
+                                setDialogState(() {
+                                  dialogError = result['message'] ?? 'Failed to reset password.';
+                                });
+                              }
+                            }
+                          } catch (e) {
+                            setDialogState(() {
+                              dialogError = 'An error occurred. Please try again.';
+                            });
+                          } finally {
+                            setDialogState(() {
+                              isDialogLoading = false;
+                            });
+                          }
+                        },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.secondary,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  child: isDialogLoading
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                        )
+                      : Text(isStepOne ? 'Send Code' : 'Reset Password'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
   Future<void> _handleAuth() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -395,6 +680,23 @@ class _ZeetechUnifiedAuthScreenState extends State<ZeetechUnifiedAuthScreen> {
                           return null;
                         },
                       ),
+                      if (_isLogin) ...[
+                        const SizedBox(height: 8),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: GestureDetector(
+                            onTap: _showForgotPasswordDialog,
+                            child: const Text(
+                              'Forgot Password?',
+                              style: TextStyle(
+                                color: AppColors.secondary,
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                       const SizedBox(height: 28),
 
                       // Submit button

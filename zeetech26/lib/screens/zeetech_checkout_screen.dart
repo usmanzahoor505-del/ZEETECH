@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import '../theme/theme.dart';
 import '../services/cart_service.dart';
@@ -32,6 +33,9 @@ class _ZeetechCheckoutScreenState extends State<ZeetechCheckoutScreen> {
   bool _isLoading = false;
   String _paymentMethod = 'Cash on Service'; // Default Cash on Service
   String? _problemImagePath;
+  final TextEditingController _tidController = TextEditingController();
+  String? _paymentReceiptPath;
+  String? _copiedValue;
 
   @override
   void initState() {
@@ -68,6 +72,7 @@ class _ZeetechCheckoutScreenState extends State<ZeetechCheckoutScreen> {
     _addressController.dispose();
     _dateController.dispose();
     _timeController.dispose();
+    _tidController.dispose();
     super.dispose();
   }
 
@@ -202,7 +207,7 @@ Preferred Schedule: ${_dateController.text} at ${_timeController.text}
       // Category Name matches the first item in cart (e.g. AC Services)
       final String categoryName = CartService().items.first.categoryName;
 
-      // Upload image first if picked
+      // Upload problem image first if picked
       String finalImagePath = '';
       if (_problemImagePath != null && _problemImagePath!.isNotEmpty) {
         final String? uploadedUrl = await UploadService.uploadImage(_problemImagePath!);
@@ -213,6 +218,27 @@ Preferred Schedule: ${_dateController.text} at ${_timeController.text}
         }
       }
 
+      // Upload payment receipt first if picked
+      String finalReceiptPath = '';
+      if (_paymentReceiptPath != null && _paymentReceiptPath!.isNotEmpty) {
+        final String? uploadedUrl = await UploadService.uploadImage(_paymentReceiptPath!);
+        if (uploadedUrl != null) {
+          finalReceiptPath = uploadedUrl;
+        } else {
+          finalReceiptPath = _paymentReceiptPath!;
+        }
+      }
+
+      String paymentDetailsText = "";
+      if (_paymentMethod != 'Cash on Service') {
+        paymentDetailsText = "\n\nPayment Details:\n- Transaction ID (TID): ${_tidController.text.trim()}\n- Receipt Proof: $finalReceiptPath";
+      }
+
+      final String updatedFullMessage = """
+$fullMessage
+$paymentDetailsText
+""".trim();
+
       final newBooking = BookingModel(
         id: bookingId,
         customerName: _nameController.text.trim(),
@@ -220,7 +246,7 @@ Preferred Schedule: ${_dateController.text} at ${_timeController.text}
         customerEmail: _emailController.text.trim(),
         customerAddress: _addressController.text.trim(),
         serviceName: categoryName,
-        message: fullMessage,
+        message: updatedFullMessage,
         status: 'Pending',
         createdAt: DateTime.now(),
         preferredDate: _dateController.text,
@@ -382,7 +408,12 @@ Preferred Schedule: ${_dateController.text} at ${_timeController.text}
           return Form(
             key: _formKey,
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
+              padding: EdgeInsets.fromLTRB(
+                16.0,
+                16.0,
+                16.0,
+                64 + MediaQuery.of(context).padding.bottom + 24.0,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -924,65 +955,95 @@ Preferred Schedule: ${_dateController.text} at ${_timeController.text}
       },
       borderRadius: BorderRadius.circular(12),
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary.withOpacity(0.06) : Colors.white,
+          color: isSelected ? AppColors.primary.withOpacity(0.04) : Colors.white,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: isSelected ? AppColors.primary : Colors.grey.shade200,
             width: isSelected ? 1.8 : 1.0,
           ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: AppColors.primary.withOpacity(0.06),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  )
+                ]
+              : null,
         ),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: isSelected ? AppColors.primary.withOpacity(0.1) : Colors.grey.shade50,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                icon,
-                color: isSelected ? AppColors.primary : AppColors.textGray,
-                size: 20,
-              ),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    method,
-                    style: TextStyle(
-                      fontSize: 13.5,
-                      fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
-                      color: isSelected ? AppColors.primary : AppColors.textDark,
-                    ),
+            Row(
+              children: [
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: isSelected ? AppColors.primary.withOpacity(0.12) : Colors.grey.shade50,
+                    shape: BoxShape.circle,
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    subtitle,
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: isSelected ? AppColors.textGray.withOpacity(0.8) : Colors.grey.shade500,
-                    ),
+                  child: Icon(
+                    icon,
+                    color: isSelected ? AppColors.primary : AppColors.textGray,
+                    size: 20,
                   ),
-                ],
-              ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        method,
+                        style: TextStyle(
+                          fontSize: 13.5,
+                          fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                          color: isSelected ? AppColors.primary : AppColors.textDark,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        subtitle,
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: isSelected ? AppColors.textGray.withOpacity(0.8) : Colors.grey.shade500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Radio<String>(
+                  value: method,
+                  groupValue: _paymentMethod,
+                  activeColor: AppColors.primary,
+                  onChanged: (val) {
+                    if (val != null) {
+                      setState(() {
+                        _paymentMethod = val;
+                      });
+                    }
+                  },
+                ),
+              ],
             ),
-            Radio<String>(
-              value: method,
-              groupValue: _paymentMethod,
-              activeColor: AppColors.primary,
-              onChanged: (val) {
-                if (val != null) {
-                  setState(() {
-                    _paymentMethod = val;
-                  });
-                }
-              },
+            AnimatedSize(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+              alignment: Alignment.topCenter,
+              child: isSelected && method != 'Cash on Service'
+                  ? Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Divider(height: 24, thickness: 0.8),
+                        _buildExpandedPaymentDetails(method),
+                      ],
+                    )
+                  : const SizedBox(width: double.infinity, height: 0),
             ),
           ],
         ),
@@ -990,7 +1051,222 @@ Preferred Schedule: ${_dateController.text} at ${_timeController.text}
     );
   }
 
-  Future<void> _pickImage(ImageSource source) async {
+  Widget _buildExpandedPaymentDetails(String method) {
+    String accountTitle = 'ZEETECH Technical Services';
+    String accountNumber = '';
+    String bankName = '';
+    String instructions = '';
+
+    if (method == 'Bank Transfer') {
+      bankName = 'Bank Alfalah Limited';
+      accountNumber = '0123-100789456';
+      instructions = 'Please transfer the grand total to our company bank account and upload your receipt screenshot with Transaction ID.';
+    } else if (method == 'Easypaisa') {
+      bankName = 'Easypaisa Wallet';
+      accountNumber = '0300-5518622';
+      instructions = 'Please transfer the grand total to our Easypaisa merchant wallet and upload your receipt screenshot with Transaction ID.';
+    } else if (method == 'JazzCash') {
+      bankName = 'JazzCash Wallet';
+      accountNumber = '0300-5518622';
+      instructions = 'Please transfer the grand total to our JazzCash merchant wallet and upload your receipt screenshot with Transaction ID.';
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Transfer Credentials:',
+          style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.textDark),
+        ),
+        const SizedBox(height: 8),
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.grey.shade50,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.grey.shade200, width: 0.8),
+          ),
+          child: Column(
+            children: [
+              _buildAccountDetailRow('Title', accountTitle),
+              const Divider(height: 16),
+              _buildAccountDetailRow('Account No', accountNumber),
+              const Divider(height: 16),
+              _buildAccountDetailRow('Network/Bank', bankName),
+            ],
+          ),
+        ),
+        const SizedBox(height: 10),
+        Text(
+          instructions,
+          style: TextStyle(fontSize: 10.5, color: AppColors.textGray.withOpacity(0.85), height: 1.4),
+        ),
+        const SizedBox(height: 14),
+        const Text(
+          'Enter Transaction ID (TID) *',
+          style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold, color: AppColors.textDark),
+        ),
+        const SizedBox(height: 6),
+        TextFormField(
+          controller: _tidController,
+          style: const TextStyle(fontSize: 13, color: AppColors.textDark),
+          decoration: InputDecoration(
+            hintText: 'Enter 11 or 12 digit TID code',
+            hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 12),
+            prefixIcon: const Icon(Icons.pin_rounded, color: Colors.grey, size: 16),
+            filled: true,
+            fillColor: Colors.white,
+            contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: BorderSide(color: Colors.grey.shade200),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: const BorderSide(color: AppColors.primary),
+            ),
+          ),
+          validator: (val) {
+            if (_paymentMethod != 'Cash on Service' && (val == null || val.trim().isEmpty)) {
+              return 'Please enter Transaction ID';
+            }
+            return null;
+          },
+        ),
+        const SizedBox(height: 14),
+        const Text(
+          'Upload Receipt Screenshot *',
+          style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold, color: AppColors.textDark),
+        ),
+        const SizedBox(height: 8),
+        InkWell(
+          onTap: () => _showImagePickerOptions(isReceipt: true),
+          borderRadius: BorderRadius.circular(12),
+          child: _paymentReceiptPath == null
+              ? Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade50,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.grey.shade200),
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.cloud_upload_rounded, color: AppColors.primary, size: 28),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Upload Receipt Proof (Screenshot)',
+                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.textDark),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Max size 5MB (JPG, PNG)',
+                        style: TextStyle(fontSize: 10, color: Colors.grey.shade500),
+                      ),
+                    ],
+                  ),
+                )
+              : Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade50,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.grey.shade200),
+                  ),
+                  child: Row(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.file(
+                          File(_paymentReceiptPath!),
+                          width: 48,
+                          height: 48,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              _paymentReceiptPath!.split('/').last,
+                              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.textDark),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Ready to upload',
+                              style: TextStyle(fontSize: 10, color: Colors.green.shade600, fontWeight: FontWeight.w600),
+                            ),
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 20),
+                        onPressed: () {
+                          setState(() {
+                            _paymentReceiptPath = null;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAccountDetailRow(String label, String value) {
+    final isCopied = _copiedValue == value;
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: TextStyle(fontSize: 11.5, color: AppColors.textGray.withOpacity(0.8), fontWeight: FontWeight.w600),
+        ),
+        Row(
+          children: [
+            Text(
+              value,
+              style: const TextStyle(fontSize: 12, color: AppColors.textDark, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(width: 8),
+            InkWell(
+              onTap: () {
+                Clipboard.setData(ClipboardData(text: value));
+                setState(() {
+                  _copiedValue = value;
+                });
+                Future.delayed(const Duration(seconds: 2), () {
+                  if (mounted && _copiedValue == value) {
+                    setState(() {
+                      _copiedValue = null;
+                    });
+                  }
+                });
+              },
+              child: AnimatedCrossFade(
+                duration: const Duration(milliseconds: 200),
+                firstChild: const Icon(Icons.check_circle_rounded, color: Colors.green, size: 15),
+                secondChild: const Icon(Icons.copy_rounded, color: AppColors.primary, size: 15),
+                crossFadeState: isCopied ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+
+  Future<void> _pickImage(ImageSource source, {bool isReceipt = false}) async {
     try {
       final ImagePicker picker = ImagePicker();
       final XFile? image = await picker.pickImage(
@@ -1001,7 +1277,11 @@ Preferred Schedule: ${_dateController.text} at ${_timeController.text}
       );
       if (image != null) {
         setState(() {
-          _problemImagePath = image.path;
+          if (isReceipt) {
+            _paymentReceiptPath = image.path;
+          } else {
+            _problemImagePath = image.path;
+          }
         });
       }
     } catch (e) {
@@ -1014,7 +1294,7 @@ Preferred Schedule: ${_dateController.text} at ${_timeController.text}
     }
   }
 
-  void _showImagePickerOptions() {
+  void _showImagePickerOptions({bool isReceipt = false}) {
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -1029,7 +1309,7 @@ Preferred Schedule: ${_dateController.text} at ${_timeController.text}
                 title: const Text('Pick from Gallery'),
                 onTap: () {
                   Navigator.pop(context);
-                  _pickImage(ImageSource.gallery);
+                  _pickImage(ImageSource.gallery, isReceipt: isReceipt);
                 },
               ),
               ListTile(
@@ -1037,7 +1317,7 @@ Preferred Schedule: ${_dateController.text} at ${_timeController.text}
                 title: const Text('Take a Photo'),
                 onTap: () {
                   Navigator.pop(context);
-                  _pickImage(ImageSource.camera);
+                  _pickImage(ImageSource.camera, isReceipt: isReceipt);
                 },
               ),
             ],

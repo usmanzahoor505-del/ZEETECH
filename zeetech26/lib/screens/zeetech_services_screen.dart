@@ -129,7 +129,12 @@ class ZeetechServicesScreen extends StatelessWidget {
           Expanded(
             child: GridView.builder(
               physics: const BouncingScrollPhysics(),
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+              padding: EdgeInsets.fromLTRB(
+                20,
+                4,
+                20,
+                64 + MediaQuery.of(context).padding.bottom + 16,
+              ),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 3,
                 mainAxisSpacing: 14,

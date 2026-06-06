@@ -730,7 +730,12 @@ class _ZeetechOrdersScreenState extends State<ZeetechOrdersScreen> {
                         )
                       : ListView.builder(
                           physics: const AlwaysScrollableScrollPhysics(),
-                          padding: const EdgeInsets.fromLTRB(16, 16, 16, 28),
+                          padding: EdgeInsets.fromLTRB(
+                            16,
+                            16,
+                            16,
+                            64 + MediaQuery.of(context).padding.bottom + 16,
+                          ),
                           itemCount: filteredBookings.length,
                           itemBuilder: (context, index) {
                             final booking = filteredBookings[index];

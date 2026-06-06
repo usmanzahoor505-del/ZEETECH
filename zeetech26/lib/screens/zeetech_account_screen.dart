@@ -3,6 +3,7 @@ import '../theme/theme.dart';
 import '../services/user_auth_service.dart';
 import '../models/membership_application_model.dart';
 import '../services/membership_application_service.dart';
+import 'legal_policies_screen.dart';
 
 /// ZEETECH PREMIUM ENTERPRISE PROFILE & ACCOUNT SCREEN
 /// Upgraded with modern high-contrast cards, dual-gradient avatar ring highlights,
@@ -11,12 +12,14 @@ class ZeetechAccountScreen extends StatefulWidget {
   final ValueChanged<String>? onNavigate; // To allow redirection to services/orders/contact tab
   final VoidCallback onLogout; // Notify main to reset and show login screen
   final bool isGuest; // Flag to indicate guest mode
+  final int? refreshTrigger;
 
   const ZeetechAccountScreen({
     super.key, 
     this.onNavigate, 
     required this.onLogout,
     this.isGuest = false,
+    this.refreshTrigger,
   });
 
   @override
@@ -38,6 +41,14 @@ class _ZeetechAccountScreenState extends State<ZeetechAccountScreen> {
     _loadUser();
   }
 
+  @override
+  void didUpdateWidget(covariant ZeetechAccountScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.refreshTrigger != oldWidget.refreshTrigger) {
+      _loadUser();
+    }
+  }
+
   // ── PRESERVED BUSINESS LOGIC 100% ──
   Future<void> _loadUser() async {
     final email = await UserAuthService.getCurrentUser();
@@ -47,7 +58,8 @@ class _ZeetechAccountScreenState extends State<ZeetechAccountScreen> {
       _currentUserFullName = details?['fullName'] ?? email;
     });
     if (email != null) {
-      _loadMembershipData(email);
+      final mobile = details?['phone'];
+      _loadMembershipData(email, mobile: mobile);
     }
   }
 
@@ -78,13 +90,13 @@ class _ZeetechAccountScreenState extends State<ZeetechAccountScreen> {
   }
 
   // ── PRESERVED DATA FETCH PATTERNS 100% ──
-  Future<void> _loadMembershipData(String email) async {
+  Future<void> _loadMembershipData(String email, {String? mobile}) async {
     if (!mounted) return;
     setState(() {
       _isLoadingMembershipData = true;
     });
     try {
-      final list = await MembershipApplicationService.fetchApplications(email: email);
+      final list = await MembershipApplicationService.fetchApplications(email: email, mobile: mobile);
       if (mounted) {
         MembershipApplicationModel? domestic;
         MembershipApplicationModel? commercial;
@@ -561,6 +573,20 @@ class _ZeetechAccountScreenState extends State<ZeetechAccountScreen> {
                       if (widget.onNavigate != null) {
                         widget.onNavigate!('contact');
                       }
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  _buildActionCard(
+                    icon: Icons.gavel_rounded,
+                    title: 'Legal & Policies',
+                    subtitle: 'Read our Privacy Policy, Terms, and Refund policies',
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const LegalPoliciesScreen(),
+                        ),
+                      );
                     },
                   ),
                   const SizedBox(height: 32),

@@ -78,6 +78,36 @@ public class OtpService {
     }
 
     /**
+     * Send Password Reset OTP Code via SMTP mail sender
+     */
+    public void sendResetPasswordEmail(String email, String otp) {
+        String subject = "ZeeTech Password Reset Verification Code";
+        String messageBody = "Dear Customer,\n\n"
+                + "We received a request to reset the password for your ZeeTech account.\n"
+                + "Your 6-digit Reset Verification Code is:\n\n"
+                + "   --> " + otp + " <--\n\n"
+                + "This OTP is valid for 5 minutes. If you did not request a password reset, please ignore this email.\n\n"
+                + "Best Regards,\n"
+                + "ZeeTech Technical Services Team";
+
+        try {
+            if (mailSender != null) {
+                SimpleMailMessage mailMessage = new SimpleMailMessage();
+                mailMessage.setTo(email.trim());
+                mailMessage.setSubject(subject);
+                mailMessage.setText(messageBody);
+                mailSender.send(mailMessage);
+                System.out.println("Reset Password OTP successfully sent to email: " + email);
+            } else {
+                System.out.println("WARNING: MailSender bean is null. Using console fallback.");
+            }
+        } catch (Exception e) {
+            System.err.println("CRITICAL: Failed to send password reset email via SMTP: " + e.getMessage());
+            System.err.println("Fall-back to Console verification: Use OTP code [" + otp + "] from server console log to reset password.");
+        }
+    }
+
+    /**
      * Validate user entered OTP code
      */
     public boolean validateOtp(String email, String enteredOtp) {

@@ -8,8 +8,9 @@ import '../services/membership_application_service.dart';
 
 class ZeetechHomeScreen extends StatefulWidget {
   final ValueChanged<String> onNavigate;
+  final int? refreshTrigger;
 
-  const ZeetechHomeScreen({super.key, required this.onNavigate});
+  const ZeetechHomeScreen({super.key, required this.onNavigate, this.refreshTrigger});
 
   @override
   State<ZeetechHomeScreen> createState() => _ZeetechHomeScreenState();
@@ -24,6 +25,14 @@ class _ZeetechHomeScreenState extends State<ZeetechHomeScreen> {
   void initState() {
     super.initState();
     _loadUser();
+  }
+
+  @override
+  void didUpdateWidget(covariant ZeetechHomeScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.refreshTrigger != oldWidget.refreshTrigger) {
+      _loadMembershipStatus();
+    }
   }
 
   bool isMembershipActive(MembershipApplicationModel application) {
@@ -53,8 +62,10 @@ class _ZeetechHomeScreenState extends State<ZeetechHomeScreen> {
   Future<void> _loadMembershipStatus() async {
     try {
       final email = await UserAuthService.getCurrentUser();
+      final details = await UserAuthService.getCurrentUserDetails();
       if (email != null) {
-        final list = await MembershipApplicationService.fetchApplications(email: email);
+        final mobile = details?['phone'];
+        final list = await MembershipApplicationService.fetchApplications(email: email, mobile: mobile);
         bool hasDomestic = false;
         bool hasCommercial = false;
 
@@ -1118,7 +1129,9 @@ class _ZeetechHomeScreenState extends State<ZeetechHomeScreen> {
                         discount: discount,
                         validity: validity,
                       ),
-                    );
+                    ).then((_) {
+                      _loadMembershipStatus();
+                    });
                   });
                 },
                 style: ElevatedButton.styleFrom(

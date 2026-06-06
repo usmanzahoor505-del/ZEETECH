@@ -417,7 +417,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
         children: [
           // List of Sub-Services
           ListView.builder(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 96), // Extra bottom padding for floating cart bar
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 180), // Extra bottom padding for floating cart bar
             itemCount: items.length + 1,
             itemBuilder: (context, index) {
               if (index == 0) {
@@ -702,7 +702,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
               if (cartItems.isEmpty) return const SizedBox.shrink();
 
               return Positioned(
-                bottom: 16,
+                bottom: 64 + MediaQuery.of(context).padding.bottom + 16,
                 left: 16,
                 right: 16,
                 child: Container(

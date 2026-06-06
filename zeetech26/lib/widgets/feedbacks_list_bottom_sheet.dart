@@ -9,7 +9,7 @@ class FeedbacksListBottomSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: MediaQuery.of(context).size.height * 0.7, // 70% of screen height
+      height: MediaQuery.of(context).size.height * 0.82,
       decoration: const BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
@@ -30,7 +30,7 @@ class FeedbacksListBottomSheet extends StatelessWidget {
               ),
             ),
           ),
-          
+
           // Header
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -66,7 +66,7 @@ class FeedbacksListBottomSheet extends StatelessWidget {
           const Divider(height: 1),
           const SizedBox(height: 16),
 
-          // Scrollable list
+          // Scrollable area
           Expanded(
             child: ValueListenableBuilder<List<BookingModel>>(
               valueListenable: BookingRepository().bookingsNotifier,
@@ -75,12 +75,14 @@ class FeedbacksListBottomSheet extends StatelessWidget {
                     .where((b) => b.rating != null && b.rating! > 0)
                     .toList();
 
+                // ── Empty state ───────────────────────────────────────
                 if (ratedBookings.isEmpty) {
                   return Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.rate_review_outlined, size: 64, color: Colors.grey.shade300),
+                        Icon(Icons.rate_review_outlined,
+                            size: 64, color: Colors.grey.shade300),
                         const SizedBox(height: 12),
                         const Text(
                           'No feedbacks yet',
@@ -104,89 +106,257 @@ class FeedbacksListBottomSheet extends StatelessWidget {
                   );
                 }
 
-                return ListView.builder(
-                  physics: const BouncingScrollPhysics(),
-                  itemCount: ratedBookings.length,
-                  itemBuilder: (context, index) {
-                    final booking = ratedBookings[index];
-                    
-                    // Mask email for client privacy if name is an email
-                    String displayName = booking.customerName;
-                    if (displayName.contains('@')) {
-                      final parts = displayName.split('@');
-                      if (parts[0].length > 3) {
-                        displayName = '${parts[0].substring(0, 3)}***@${parts[1]}';
-                      }
-                    }
+                // ── Compute averages ──────────────────────────────────
+                final double avgRating = ratedBookings
+                        .map((b) => b.rating!.toDouble())
+                        .reduce((a, b) => a + b) /
+                    ratedBookings.length;
 
-                    return Container(
+                final starCounts = List.generate(5, (i) {
+                  final star = 5 - i;
+                  return ratedBookings
+                      .where((b) => b.rating == star)
+                      .length;
+                });
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // ── Average Rating Banner ─────────────────────────
+                    Container(
+                      width: double.infinity,
                       margin: const EdgeInsets.only(bottom: 16),
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 16),
                       decoration: BoxDecoration(
-                        color: Colors.grey.shade50,
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF1565C0), Color(0xFF42A5F5)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
                         borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: Colors.grey.shade100),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF1565C0).withOpacity(0.3),
+                            blurRadius: 16,
+                            offset: const Offset(0, 6),
+                          ),
+                        ],
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          // ── Big numeric score + stars + count ──
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      displayName,
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 14,
-                                        color: AppColors.textDark,
-                                      ),
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      booking.serviceName,
-                                      style: const TextStyle(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w600,
-                                        color: AppColors.primary,
-                                      ),
-                                    ),
-                                  ],
+                              Text(
+                                avgRating.toStringAsFixed(1),
+                                style: const TextStyle(
+                                  fontSize: 52,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                  height: 1,
                                 ),
                               ),
+                              const SizedBox(height: 6),
                               Row(
-                                children: List.generate(5, (starIndex) {
-                                  final starValue = starIndex + 1;
-                                  final isFilled = starValue <= (booking.rating ?? 0);
+                                children: List.generate(5, (i) {
+                                  final filled = (i + 1) <= avgRating;
+                                  final halfFilled =
+                                      !filled && (i < avgRating);
                                   return Icon(
-                                    Icons.star_rounded,
-                                    color: isFilled ? Colors.amber : Colors.grey.shade300,
-                                    size: 16,
+                                    halfFilled
+                                        ? Icons.star_half_rounded
+                                        : Icons.star_rounded,
+                                    size: 18,
+                                    color: (filled || halfFilled)
+                                        ? Colors.amber
+                                        : Colors.white.withOpacity(0.35),
                                   );
                                 }),
                               ),
+                              const SizedBox(height: 6),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 10, vertical: 3),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.15),
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Text(
+                                  '${ratedBookings.length} review${ratedBookings.length == 1 ? '' : 's'}',
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
                             ],
                           ),
-                          if (booking.feedbackComment != null && booking.feedbackComment!.isNotEmpty) ...[
-                            const SizedBox(height: 10),
-                            Text(
-                              '"${booking.feedbackComment}"',
-                              style: const TextStyle(
-                                fontSize: 13,
-                                color: AppColors.textDark,
-                                fontStyle: FontStyle.italic,
-                                height: 1.4,
-                              ),
+                          const SizedBox(width: 24),
+                          // ── Per-star progress bars ──
+                          Expanded(
+                            child: Column(
+                              children: List.generate(5, (i) {
+                                final star = 5 - i;
+                                final count = starCounts[i];
+                                final fraction = ratedBookings.isEmpty
+                                    ? 0.0
+                                    : count / ratedBookings.length;
+                                return Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 3),
+                                  child: Row(
+                                    children: [
+                                      Text(
+                                        '$star',
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      const Icon(Icons.star_rounded,
+                                          size: 12, color: Colors.amber),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(4),
+                                          child: LinearProgressIndicator(
+                                            value: fraction,
+                                            minHeight: 7,
+                                            backgroundColor:
+                                                Colors.white.withOpacity(0.2),
+                                            valueColor:
+                                                const AlwaysStoppedAnimation<
+                                                    Color>(Colors.amber),
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      SizedBox(
+                                        width: 18,
+                                        child: Text(
+                                          '$count',
+                                          textAlign: TextAlign.right,
+                                          style: TextStyle(
+                                            fontSize: 11,
+                                            color:
+                                                Colors.white.withOpacity(0.8),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              }),
                             ),
-                          ],
+                          ),
                         ],
                       ),
-                    );
-                  },
+                    ),
+
+                    // ── Individual feedback cards ─────────────────────
+                    Expanded(
+                      child: ListView.builder(
+                        physics: const BouncingScrollPhysics(),
+                        itemCount: ratedBookings.length,
+                        itemBuilder: (context, index) {
+                          final booking = ratedBookings[index];
+
+                          // Mask email for privacy
+                          String displayName = booking.customerName;
+                          if (displayName.contains('@')) {
+                            final parts = displayName.split('@');
+                            if (parts[0].length > 3) {
+                              displayName =
+                                  '${parts[0].substring(0, 3)}***@${parts[1]}';
+                            }
+                          }
+
+                          return Container(
+                            margin: const EdgeInsets.only(bottom: 16),
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade50,
+                              borderRadius: BorderRadius.circular(20),
+                              border:
+                                  Border.all(color: Colors.grey.shade100),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            displayName,
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 14,
+                                              color: AppColors.textDark,
+                                            ),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          const SizedBox(height: 2),
+                                          Text(
+                                            booking.serviceName,
+                                            style: const TextStyle(
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.w600,
+                                              color: AppColors.primary,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Row(
+                                      children:
+                                          List.generate(5, (starIndex) {
+                                        final starValue = starIndex + 1;
+                                        final isFilled = starValue <=
+                                            (booking.rating ?? 0);
+                                        return Icon(
+                                          Icons.star_rounded,
+                                          color: isFilled
+                                              ? Colors.amber
+                                              : Colors.grey.shade300,
+                                          size: 16,
+                                        );
+                                      }),
+                                    ),
+                                  ],
+                                ),
+                                if (booking.feedbackComment != null &&
+                                    booking.feedbackComment!.isNotEmpty) ...[
+                                  const SizedBox(height: 10),
+                                  Text(
+                                    '"${booking.feedbackComment}"',
+                                    style: const TextStyle(
+                                      fontSize: 13,
+                                      color: AppColors.textDark,
+                                      fontStyle: FontStyle.italic,
+                                      height: 1.4,
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
                 );
               },
             ),

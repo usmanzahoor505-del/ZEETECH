@@ -28,10 +28,11 @@ public class AuthController {
         if (email == null || email.trim().isEmpty()) {
             return ResponseEntity.badRequest().body("Email is required to send OTP");
         }
+        email = email.trim().toLowerCase();
 
-        Optional<User> existing = userRepository.findByEmail(email.trim());
+        Optional<User> existing = userRepository.findByEmail(email);
         if (existing.isPresent()) {
-            return ResponseEntity.badRequest().body("Email already registered");
+            return ResponseEntity.badRequest().body("Account already exists for this email");
         }
 
         String otp = otpService.generateOtp(email);
@@ -53,6 +54,7 @@ public class AuthController {
         if (email == null || password == null) {
             return ResponseEntity.badRequest().body("Email and Password are required");
         }
+        email = email.trim().toLowerCase();
 
         if (otp == null || otp.trim().isEmpty()) {
             return ResponseEntity.badRequest().body("Verification code (OTP) is required");
@@ -65,7 +67,7 @@ public class AuthController {
 
         Optional<User> existing = userRepository.findByEmail(email);
         if (existing.isPresent()) {
-            return ResponseEntity.badRequest().body("Email already registered");
+            return ResponseEntity.badRequest().body("Account already exists for this email");
         }
 
         String passwordHash = HashUtil.hash(password);
@@ -85,6 +87,7 @@ public class AuthController {
         if (email == null || password == null) {
             return ResponseEntity.badRequest().body("Email and Password are required");
         }
+        email = email.trim().toLowerCase();
 
         // Predefined admin credentials check
         if ("admin".equalsIgnoreCase(email) && "admin123".equals(password)) {
@@ -126,10 +129,11 @@ public class AuthController {
         if (email == null || password == null || fullName == null) {
             return ResponseEntity.badRequest().body("Full Name, Email, and Password are required");
         }
+        email = email.trim().toLowerCase();
 
-        Optional<User> existing = userRepository.findByEmail(email.trim());
+        Optional<User> existing = userRepository.findByEmail(email);
         if (existing.isPresent()) {
-            return ResponseEntity.badRequest().body("Email already registered");
+            return ResponseEntity.badRequest().body("Account already exists for this email");
         }
 
         String passwordHash = HashUtil.hash(password);
@@ -147,6 +151,7 @@ public class AuthController {
         return ResponseEntity.ok(technicians);
     }
 
+
     @DeleteMapping("/technicians/{id}")
     public ResponseEntity<?> deleteTechnician(@PathVariable Long id) {
         Optional<User> userOpt = userRepository.findById(id);
@@ -160,6 +165,57 @@ public class AuthController {
         userRepository.delete(user);
         Map<String, String> response = new HashMap<>();
         response.put("message", "Technician removed successfully");
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+        if (email == null || email.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("Email is required");
+        }
+        email = email.trim().toLowerCase();
+
+        Optional<User> userOpt = userRepository.findByEmail(email);
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.badRequest().body("No account found for this email");
+        }
+
+        String otp = otpService.generateOtp(email);
+        otpService.sendResetPasswordEmail(email, otp);
+
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Reset verification code sent to your email");
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+        String otp = request.get("otp");
+        String newPassword = request.get("newPassword");
+
+        if (email == null || otp == null || newPassword == null) {
+            return ResponseEntity.badRequest().body("Email, OTP, and New Password are required");
+        }
+        email = email.trim().toLowerCase();
+
+        boolean isOtpValid = otpService.validateOtp(email, otp);
+        if (!isOtpValid) {
+            return ResponseEntity.badRequest().body("Invalid or expired verification code");
+        }
+
+        Optional<User> userOpt = userRepository.findByEmail(email);
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.badRequest().body("No account found for this email");
+        }
+
+        User user = userOpt.get();
+        user.setPasswordHash(HashUtil.hash(newPassword));
+        userRepository.save(user);
+
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Password updated successfully");
         return ResponseEntity.ok(response);
     }
 }

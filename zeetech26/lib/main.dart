@@ -59,6 +59,10 @@ class _AppEntryScreenState extends State<AppEntryScreen> {
   // Navigation history to handle physical/virtual device back buttons correctly
   final List<String> _navigationHistory = [];
 
+  // Triggers to reload child screen data on tab selection
+  int _homeRefreshTrigger = 0;
+  int _accountRefreshTrigger = 0;
+
   @override
   void initState() {
     super.initState();
@@ -124,6 +128,12 @@ class _AppEntryScreenState extends State<AppEntryScreen> {
         _activeTab = screen;
       }
 
+      if (_activeTab == 'home') {
+        _homeRefreshTrigger++;
+      } else if (_activeTab == 'account') {
+        _accountRefreshTrigger++;
+      }
+
       // If we go back to the home page, clear history to reset the back navigation stack
       if (screen == 'home') {
         _navigationHistory.clear();
@@ -142,6 +152,11 @@ class _AppEntryScreenState extends State<AppEntryScreen> {
         }
         if (_activeTab != 'product-detail') {
           _selectedProductCategoryId = null;
+        }
+        if (_activeTab == 'home') {
+          _homeRefreshTrigger++;
+        } else if (_activeTab == 'account') {
+          _accountRefreshTrigger++;
         }
       });
     }
@@ -309,6 +324,7 @@ class _AppEntryScreenState extends State<AppEntryScreen> {
     switch (_activeTab) {
       case 'home':
         return ZeetechHomeScreen(
+          refreshTrigger: _homeRefreshTrigger,
           onNavigate: (screen) => _handleNavigate(screen),
         );
       case 'services':
@@ -338,6 +354,7 @@ class _AppEntryScreenState extends State<AppEntryScreen> {
         );
       case 'account':
         return ZeetechAccountScreen(
+          refreshTrigger: _accountRefreshTrigger,
           isGuest: _isGuest,
           onNavigate: (screen) => _handleNavigate(screen),
           onLogout: () {
@@ -348,6 +365,7 @@ class _AppEntryScreenState extends State<AppEntryScreen> {
         );
       default:
         return ZeetechHomeScreen(
+          refreshTrigger: _homeRefreshTrigger,
           onNavigate: (screen) => _handleNavigate(screen),
         );
     }
@@ -420,6 +438,7 @@ class _AppEntryScreenState extends State<AppEntryScreen> {
         }
       },
       child: Scaffold(
+        extendBody: true,
         body: SafeArea(
           top: _activeTab != 'service-detail' && 
                _activeTab != 'product-detail' && 
